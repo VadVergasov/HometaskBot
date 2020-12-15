@@ -123,7 +123,7 @@ def get_ht(date):
             )
             > 1
         ):
-            string += (
+            string += "`" + (
                 " ".join(
                     [
                         x
@@ -135,12 +135,21 @@ def get_ht(date):
                         if x != ""
                     ]
                 )
-            ) + ": "
+                + ": "
+            )
             try:
-                string += row.xpath("td[2]/div[2]/div")[0].text_content().strip() + "\n"
+                string += row.xpath("td[2]/div[2]/div")[0].text_content().strip()
             except IndexError:
-                string += "Ничего\n"
-    return "```\n" + string + "\n```"
+                string += "Ничего"
+            try:
+                string += (
+                    "`\n[Файлы](https://gymn29.schools.by"
+                    + str(row.xpath("td[2]/div[1]/div[1]/a[1]/@href")[0])
+                    + ")\n"
+                )
+            except IndexError:
+                string += "`\n"
+    return "" + string + "\n"
 
 
 BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
