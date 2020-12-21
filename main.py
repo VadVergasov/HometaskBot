@@ -82,6 +82,9 @@ def get_ht(date, message):
         quarter = 44
 
     user_info = None
+    if not os.path.isfile("database.json"):
+        with open("database.json", "w") as f:
+            f.write("{}")
     with open("database.json", "r", encoding="utf-8") as f:
         user_info = json.load(f)
     if not str(message.chat.id) in user_info.keys():
@@ -183,13 +186,6 @@ BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
 def add_member(message):
     if len(message.text.split(" ")) < 3:
         BOT.reply_to(message, config.INCORRECT_FORMAT, disable_notification=True)
-        return
-    if message.chat.type != "private" and not (
-        BOT.get_chat_member(message.chat.id, message.from_user.id).status == "creator"
-        or BOT.get_chat_member(message.chat.id, message.from_user.id).status
-        == "administrator"
-    ):
-        BOT.reply_to(message, config.NO_PERMISSION, disable_notification=True)
         return
     current_chats = None
     if not os.path.isfile("database.json"):
