@@ -2,3 +2,5 @@ config.py
 .vscode/
 __pycache__/
 hometasker_env/
+log.txt
+database.json

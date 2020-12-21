@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import datetime
+import json
+import os
 import re
 
 import requests
@@ -53,7 +55,7 @@ def check_date(date):
     return "OK"
 
 
-def get_ht(date):
+def get_ht(date, message):
     string = ""
     year = int("20" + str(date.split(".")[2]))
     month = int(date.split(".")[1])
@@ -79,22 +81,44 @@ def get_ht(date):
     elif month > 3 and month < 6:
         quarter = 44
 
+    user_info = None
+    with open("database.json", "r", encoding="utf-8") as f:
+        user_info = json.load(f)
+    if not str(message.chat.id) in user_info.keys():
+        BOT.reply_to(message, config.NO_INFO)
+
+    headers = config.HEADERS
+    headers["cookie"] = str(
+        user_info[str(message.chat.id)][str(message.from_user.id)]["cookie"]
+    )
+    pupil_id = None
+    if not str(message.from_user.id) in user_info[str(message.chat.id)].keys():
+        pupil_id = str(
+            user_info[str(message.chat.id)][user_info[str(message.chat.id)].keys()[0]]
+        )
+    else:
+        pupil_id = str(user_info[str(message.chat.id)][str(message.from_user.id)]["id"])
+
     try:
         r = requests.get(
-            "https://gymn29.schools.by/pupil/576266/dnevnik/quarter/"
+            "https://gymn29.schools.by/pupil/"
+            + pupil_id
+            + "/dnevnik/quarter/"
             + str(quarter)
             + "/week/"
             + str(monday),
-            headers=config.HEADERS,
+            headers=headers,
         )
     except requests.exceptions.ConnectionError:
         try:
             r = requests.get(
-                "https://gymn29.schools.by/pupil/576266/dnevnik/quarter/"
+                "https://gymn29.schools.by/pupil/"
+                + pupil_id
+                + "/dnevnik/quarter/"
                 + str(quarter)
                 + "/week/"
                 + str(monday),
-                headers=config.HEADERS,
+                headers=headers,
             )
         except requests.exceptions.ConnectionError:
             return config.SOMETHING_WENT_WRONG
@@ -153,6 +177,37 @@ def get_ht(date):
 
 
 BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
+
+
+@BOT.message_handler(commands=["set"])
+def add_member(message):
+    if len(message.text.split(" ")) < 3:
+        BOT.reply_to(message, config.INCORRECT_FORMAT, disable_notification=True)
+        return
+    if message.chat.type != "private" and not (
+        BOT.get_chat_member(message.chat.id, message.from_user.id).status == "creator"
+        or BOT.get_chat_member(message.chat.id, message.from_user.id).status
+        == "administrator"
+    ):
+        BOT.reply_to(message, config.NO_PERMISSION, disable_notification=True)
+        return
+    current_chats = None
+    if not os.path.isfile("database.json"):
+        with open("database.json", "w") as f:
+            f.write("{}")
+    with open("database.json", "r", encoding="utf-8") as f:
+        current_chats = json.load(f)
+    current_chats[str(message.chat.id)] = {
+        message.from_user.id: {
+            "id": message.text.split(" ")[1],
+            "cookie": str(message.text.split(" ")[2:])
+            .replace(",", "")
+            .replace("'", "")[1:-1],
+        }
+    }
+    with open("database.json", "w") as f:
+        json.dump(current_chats, f)
+    BOT.reply_to(message, "Ok", disable_notification=True)
 
 
 @BOT.message_handler(commands=["hometask"])
@@ -285,7 +340,7 @@ def callback(call):
             + " "
             + call.data
             + ":\n"
-            + get_ht(call.data),
+            + get_ht(call.data, call.message.reply_to_message),
             disable_notification=True,
         )
         if str(call.from_user.id) in config.CUSTOM_TEXT.keys():

@@ -3,8 +3,7 @@ HEADERS = {
     "accept": "text/html, */*; q=0.01",
     "accept-encoding": "gzip, deflate, br",
     "accept-language": "be,ru;q=0.9,be-BY;q=0.8,ru-RU;q=0.7,en-US;q=0.6,en;q=0.5",
-    "cookie": "{str}",
-    "referer": "{str}",
+    "cookie": "",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36",
 }
 INCORRECT_FORMAT = "{str}"
@@ -16,3 +15,5 @@ ANSWER_TEXT = "{str}"
 CUSTOM_TEXT = {"{id}": "{str}"}
 WEEK_CHANGE_TEXT = "{str}"
 HOMETASK_ON = "{str}"
+NO_PERMISSION = "{str}"
+NO_INFO = "{str}"
