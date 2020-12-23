@@ -88,19 +88,26 @@ def get_ht(date, message):
     with open("database.json", "r", encoding="utf-8") as f:
         user_info = json.load(f)
     if not str(message.chat.id) in user_info.keys():
-        BOT.reply_to(message, config.NO_INFO)
+        return config.NO_INFO
 
     headers = config.HEADERS
-    headers["cookie"] = str(
-        user_info[str(message.chat.id)][str(message.from_user.id)]["cookie"]
-    )
     pupil_id = None
-    if not str(message.from_user.id) in user_info[str(message.chat.id)].keys():
-        pupil_id = str(
-            user_info[str(message.chat.id)][user_info[str(message.chat.id)].keys()[0]]
+    if str(message.from_user.id) in user_info[str(message.chat.id)].keys():
+        pupil_id = str(user_info[str(message.chat.id)][str(message.from_user.id)]["id"])
+        headers["cookie"] = str(
+            user_info[str(message.chat.id)][str(message.from_user.id)]["cookie"]
         )
     else:
-        pupil_id = str(user_info[str(message.chat.id)][str(message.from_user.id)]["id"])
+        pupil_id = str(
+            user_info[str(message.chat.id)][
+                list(user_info[str(message.chat.id)].keys())[0]
+            ]["id"]
+        )
+        headers["cookie"] = str(
+            user_info[str(message.chat.id)][
+                list(user_info[str(message.chat.id)].keys())[0]
+            ]["cookie"]
+        )
 
     try:
         r = requests.get(
@@ -332,9 +339,9 @@ def callback(call):
             + "](tg://user?id="
             + str(call.from_user.id)
             + "), "
-            + config.HOMETASK_ON
+            + str(config.HOMETASK_ON)
             + " "
-            + call.data
+            + str(call.data)
             + ":\n"
             + get_ht(call.data, call.message.reply_to_message),
             disable_notification=True,
