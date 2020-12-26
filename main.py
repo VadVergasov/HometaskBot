@@ -72,13 +72,13 @@ def get_ht(date, message):
 
     quarter = 0
 
-    if month > 8 and month < 11:
+    if 8 < month < 11:
         quarter = 40
-    elif month > 10 and month < 13:
+    elif 10 < month < 13:
         quarter = 42
-    elif month > 0 and month < 4:
+    elif 0 < month < 4:
         quarter = 43
-    elif month > 3 and month < 6:
+    elif 3 < month < 6:
         quarter = 44
 
     user_info = None
@@ -136,7 +136,7 @@ def get_ht(date, message):
     try:
         tree = html.fromstring(r.text)
     except etree.ParserError:
-        return "Дата не действительна"
+        return config.NO_DATE
 
     date_str = "db_table_" + date
 
