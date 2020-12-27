@@ -34,6 +34,11 @@ DATES = {
 }
 
 
+def write_to_log(message):
+    with open("log.txt", "a+") as fl:
+        fl.write(str(message) + "\n")
+
+
 def check_date(date):
     """
     Check if date is correct or not.
@@ -130,7 +135,8 @@ def get_ht(date, message):
                 + str(monday),
                 headers=headers,
             )
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as error:
+            write_to_log("RequestsError: {0}".format(error))
             return config.SOMETHING_WENT_WRONG
 
     try:
