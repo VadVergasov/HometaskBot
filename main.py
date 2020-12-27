@@ -257,12 +257,13 @@ def send_hometask(message):
             + (start_of_week + datetime.timedelta(days=13)).strftime("%d.%m.%y"),
         )
     )  # next_button.
-    BOT.reply_to(message, config.CHOOSE_DATE, reply_markup=keyboard)
+    BOT.reply_to(
+        message, config.CHOOSE_DATE, reply_markup=keyboard, disable_notification=True
+    )
 
 
 @BOT.callback_query_handler(func=lambda call: True)
 def callback(call):
-
     if len(call.data.split(" ")) == 3:
         start_of_week = datetime.datetime.strptime(
             str(call.data).split(" ")[0], "%d.%m.%y"
@@ -355,13 +356,13 @@ def callback(call):
         if str(call.from_user.id) in config.CUSTOM_TEXT.keys():
             BOT.answer_callback_query(
                 call.id,
-                show_alert=True,
+                show_alert=False,
                 text=config.ANSWER_TEXT + config.CUSTOM_TEXT[str(call.from_user.id)],
             )
         else:
             BOT.answer_callback_query(
                 call.id,
-                show_alert=True,
+                show_alert=False,
                 text=config.ANSWER_TEXT,
             )
 
