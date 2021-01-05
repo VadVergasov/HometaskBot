@@ -17,3 +17,9 @@ WEEK_CHANGE_TEXT = "{str}"
 HOMETASK_ON = "{str}"
 NO_INFO = "{str}"
 ABOUT = "{str}"
+COMMANDS = {
+    "start": "{str}",
+    "help": "{str}",
+    "hometask": "{str}",
+    "set": "{str}",
+}

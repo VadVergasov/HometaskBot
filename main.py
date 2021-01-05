@@ -372,4 +372,10 @@ def callback(call):
             )
 
 
+commands = []
+for command in config.COMMANDS.keys():
+    commands.append(telebot.types.BotCommand(command, config.COMMANDS[command]))
+
+BOT.set_my_commands(commands)
+
 BOT.polling()
