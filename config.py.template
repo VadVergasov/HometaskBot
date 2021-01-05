@@ -16,3 +16,4 @@ CUSTOM_TEXT = {"{id}": "{str}"}
 WEEK_CHANGE_TEXT = "{str}"
 HOMETASK_ON = "{str}"
 NO_INFO = "{str}"
+ABOUT = "{str}"

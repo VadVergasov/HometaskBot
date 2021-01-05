@@ -195,6 +195,11 @@ def get_ht(date, message):
 BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
 
 
+@BOT.message_handler(commands=["start", "help"])
+def info(message):
+    BOT.reply_to(message, config.ABOUT)
+
+
 @BOT.message_handler(commands=["set"])
 def add_member(message):
     if len(message.text.split(" ")) < 3:
