@@ -62,14 +62,16 @@ def check_date(date):
 
 def get_ht(date, message):
     string = ""
-    year = int("20" + str(date.split(".")[2]))
-    month = int(date.split(".")[1])
-    day = int(date.split(".")[0])
+    year, month, day = (
+        int("20" + str(date.split(".")[2])),
+        int(date.split(".")[1]),
+        int(date.split(".")[0]),
+    )
     monday = str(
         datetime.datetime.strptime(
             str(year)
             + "-W"
-            + str(datetime.date(year, month, day).isocalendar()[1] - 1)
+            + str(datetime.date(year, month, day).isocalendar()[1])
             + "-1",
             "%Y-W%W-%w",
         )
