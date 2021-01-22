@@ -67,15 +67,8 @@ def get_ht(date, message):
         int(date.split(".")[1]),
         int(date.split(".")[0]),
     )
-    monday = str(
-        datetime.datetime.strptime(
-            str(year)
-            + "-W"
-            + str(datetime.date(year, month, day).isocalendar()[1])
-            + "-1",
-            "%Y-W%W-%w",
-        )
-    ).split(" ")[0]
+    day = datetime.datetime(year, month, day)
+    monday = str(day - datetime.timedelta(days=day.weekday())).split(" ")[0]
 
     quarter = 0
 
