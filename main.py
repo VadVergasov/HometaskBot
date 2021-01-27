@@ -192,7 +192,7 @@ BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
 
 @BOT.message_handler(commands=["start", "help"])
 def info(message):
-    BOT.reply_to(message, config.ABOUT)
+    BOT.reply_to(message, config.ABOUT, disable_notification=True)
 
 
 @BOT.message_handler(commands=["set"])
