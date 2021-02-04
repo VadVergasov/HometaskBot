@@ -38,6 +38,14 @@ def get_token(username, password):
         data={"username": username, "password": password},
     )
     while tries < 10 and request.status_code == 200:
+        try:
+            if (
+                request.json()["details"]
+                == "Невозможно войти с предоставленными учетными данными."
+            ):
+                return config.INCORRECT_CREDENTIALS
+        except:
+            pass
         request = requests.post(
             "https://schools.by/api/auth",
             data={"username": username, "password": password},
@@ -79,10 +87,9 @@ def get_ht(date, message):
     if not str(message.from_user.id) in TOKENS.keys():
         if not str(message.chat.id) in TOKENS.keys():
             return config.NO_INFO
-        else:
-            token = TOKENS[str(message.chat.id)]
+        token = TOKENS[str(message.chat.id)]
     else:
-        token = str(message.from_user.id)
+        token = TOKENS[str(message.from_user.id)]
 
     headers = {"Authorization": "Token " + token + " "}
 
@@ -96,6 +103,9 @@ def get_ht(date, message):
         )
         tries += 1
     if request.status_code != 200:
+        write_to_log(
+            "String 99 request status isn't equal to 200\n" + str(request.text) + "\n"
+        )
         return config.SOMETHING_WENT_WRONG
     user_info = request.json()
 
@@ -162,13 +172,16 @@ def check(message):
 
 
 def check_for_creds(message):
-    if len(message.text.split(" ")) == 2:
-        try:
-            message.reply_to_message.chat.id
-        except AttributeError:
-            return False
-        return True
-    return False
+    try:
+        if len(message.text.split(" ")) == 2:
+            try:
+                message.reply_to_message.chat.id
+            except AttributeError:
+                return False
+            return True
+        return False
+    except:
+        return False
 
 
 @BOT.message_handler(commands=["start", "help"])
@@ -184,6 +197,9 @@ def getting_token(message):
     if token == "Retry later":
         BOT.send_message(message.chat.id, config.RETRY_LATER)
         return
+    if token == config.INCORRECT_CREDENTIALS:
+        BOT.send_message(message.chat.id, config.INCORRECT_CREDENTIALS)
+        return
     TOKENS[str(message.from_user.id)] = token
     tries = 0
     headers = {"Authorization": "Token " + TOKENS[str(message.from_user.id)] + " "}
@@ -196,6 +212,9 @@ def getting_token(message):
         )
         tries += 1
     if request.status_code != 200:
+        write_to_log(
+            "String 211 request status isn't equal to 200\n" + str(request.text) + "\n"
+        )
         return config.SOMETHING_WENT_WRONG
     user_info = request.json()
     BOT.send_message(
