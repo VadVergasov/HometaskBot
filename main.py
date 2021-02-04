@@ -32,29 +32,32 @@ with open("database.json", "r", encoding="utf-8") as f:
 
 
 def get_token(username, password):
-    tries = 0
-    request = requests.post(
-        "https://schools.by/api/auth",
-        data={"username": username, "password": password},
-    )
-    while tries < 10 and request.status_code == 200:
-        try:
-            if (
-                request.json()["details"]
-                == "Невозможно войти с предоставленными учетными данными."
-            ):
-                return config.INCORRECT_CREDENTIALS
-        except:
-            pass
+    try:
+        tries = 0
         request = requests.post(
             "https://schools.by/api/auth",
             data={"username": username, "password": password},
         )
-        tries += 1
-    if request.status_code != 200:
-        return "Retry later"
-    token = request.json()["token"]
-    return token
+        while tries < 10 and request.status_code == 200:
+            try:
+                if (
+                    request.json()["details"]
+                    == "Невозможно войти с предоставленными учетными данными."
+                ):
+                    return config.INCORRECT_CREDENTIALS
+            except:
+                pass
+            request = requests.post(
+                "https://schools.by/api/auth",
+                data={"username": username, "password": password},
+            )
+            tries += 1
+        if request.status_code != 200:
+            return "Retry later"
+        token = request.json()["token"]
+        return token
+    except ConnectionResetError:
+        return "Network error"
 
 
 def write_to_log(message):
@@ -197,8 +200,11 @@ def getting_token(message):
     if token == "Retry later":
         BOT.send_message(message.chat.id, config.RETRY_LATER)
         return
-    if token == config.INCORRECT_CREDENTIALS:
+    elif token == config.INCORRECT_CREDENTIALS:
         BOT.send_message(message.chat.id, config.INCORRECT_CREDENTIALS)
+        return
+    elif token == "Network error":
+        BOT.send_message(message.chat.id, config.RETRY_LATER)
         return
     TOKENS[str(message.from_user.id)] = token
     tries = 0
