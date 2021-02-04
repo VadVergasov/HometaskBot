@@ -1,0 +1,26 @@
+TG_TOKEN = "Your telegram bot token" #change is required
+INCORRECT_FORMAT = "Invalid command format."
+NOT_VALID = "You've entered non-school day."
+NO_DATE = "Date is not present or present wrongly."
+SOMETHING_WENT_WRONG = "Something gone wrong. Try again."
+CHOOSE_DATE = "Select date:"
+ANSWER_TEXT = "Hometask sent."
+CUSTOM_TEXT = {"": ""}
+WEEK_CHANGE_TEXT = "Switching to other week."
+HOMETASK_ON = "hometask on"
+NO_INFO = "Diary isn't present. Better to run /login in bot's DM."
+ABOUT = "This bot let you get hometask from schools.by platform. To use it, you should use /login command. Note: bot doesn't store your password, nor login."
+COMMANDS = {
+    "start": "Launch bot.",
+    "help": "Information about this bot",
+    "hometask": "Request hometask.",
+    "set": "Set default diary for group to person's, that called command, diary.",
+    "login": "Login to the platform.",
+}
+NO_ADMIN = (
+    "Bot requires /"Delete messages/" permission to run in group chat."
+)
+LOGIN_TEXT = "Reply to this message with your's username and password in according format (username password)"
+RETRY_LATER = "Retry later."
+LOGGED_IN = "You've logged in as {0} {1}, from {2}. Delete message with your credentials for privacy reasons!"
+INCORRECT_CREDENTIALS = "You've entered wrong username or password."
