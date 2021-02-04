@@ -137,24 +137,31 @@ def get_ht(date, message):
 
     hometask = r.json()
 
-    for row in hometask["lessons"].keys():
-        string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
-        if hometask["lessons"][row]["lesson_data"]["hometask"] == None:
-            string += "Ничего\n`"
-        else:
-            string += hometask["lessons"][row]["lesson_data"]["hometask"]["text"]
-            if (
-                len(hometask["lessons"][row]["lesson_data"]["hometask"]["attachments"])
-                != 0
-            ):
-                string += "`"
-                for attachment in hometask["lessons"][row]["lesson_data"]["hometask"][
-                    "attachments"
-                ]:
-                    string += "\n[Файл](" + str(attachment["file"]) + ")\n"
+    try:
+        for row in hometask["lessons"].keys():
+            string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
+            if hometask["lessons"][row]["lesson_data"]["hometask"] == None:
+                string += "Ничего\n`"
             else:
-                string += "`\n"
-    return string
+                string += hometask["lessons"][row]["lesson_data"]["hometask"]["text"]
+                if (
+                    len(
+                        hometask["lessons"][row]["lesson_data"]["hometask"][
+                            "attachments"
+                        ]
+                    )
+                    != 0
+                ):
+                    string += "`"
+                    for attachment in hometask["lessons"][row]["lesson_data"][
+                        "hometask"
+                    ]["attachments"]:
+                        string += "\n[Файл](" + str(attachment["file"]) + ")\n"
+                else:
+                    string += "`\n"
+        return string
+    except KeyError:
+        return config.NOT_VALID
 
 
 BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
