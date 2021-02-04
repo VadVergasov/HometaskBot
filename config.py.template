@@ -1,18 +1,11 @@
 TG_TOKEN = "{str}"
-HEADERS = {
-    "accept": "text/html, */*; q=0.01",
-    "accept-encoding": "gzip, deflate, br",
-    "accept-language": "be,ru;q=0.9,be-BY;q=0.8,ru-RU;q=0.7,en-US;q=0.6,en;q=0.5",
-    "cookie": "",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36",
-}
 INCORRECT_FORMAT = "{str}"
 NOT_VALID = "{str}"
 NO_DATE = "{str}"
 SOMETHING_WENT_WRONG = "{str}"
 CHOOSE_DATE = "{str}"
 ANSWER_TEXT = "{str}"
-CUSTOM_TEXT = {"{id}": "{str}"}
+CUSTOM_TEXT = {"": ""}
 WEEK_CHANGE_TEXT = "{str}"
 HOMETASK_ON = "{str}"
 NO_INFO = "{str}"
@@ -22,4 +15,11 @@ COMMANDS = {
     "help": "{str}",
     "hometask": "{str}",
     "set": "{str}",
+    "login": "{str}",
 }
+NO_ADMIN = (
+    "{str}"
+)
+LOGIN_TEXT = "{str}"
+RETRY_LATER = "{str}"
+LOGGED_IN = "{str}"
