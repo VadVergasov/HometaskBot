@@ -32,6 +32,9 @@ with open("database.json", "r", encoding="utf-8") as f:
 
 
 def get_token(username, password):
+    """
+    Getting token to access schools.by API.
+    """
     try:
         tries = 0
         request = requests.post(
@@ -61,8 +64,11 @@ def get_token(username, password):
 
 
 def write_to_log(message):
-    with open("log.txt", "a+") as fl:
-        fl.write(str(message) + "\n")
+    """
+    Writing messages to log.
+    """
+    with open("log.txt", "a+") as fl_stream:
+        fl_stream.write(str(message) + "\n")
 
 
 def check_date(date):
@@ -79,6 +85,9 @@ def check_date(date):
 
 
 def get_ht(date, message):
+    """
+    Get hometask by date.
+    """
     string = ""
     year, month, day = (
         "20" + str(date.split(".")[2]),
@@ -115,7 +124,7 @@ def get_ht(date, message):
     pupil_id = user_info["id"]
 
     try:
-        r = requests.get(
+        request = requests.get(
             "https://schools.by/subdomain-api/pupil/"
             + str(pupil_id)
             + "/daybook/day/"
@@ -124,7 +133,7 @@ def get_ht(date, message):
         )
     except requests.exceptions.ConnectionError:
         try:
-            r = requests.get(
+            request = requests.get(
                 "https://schools.by/subdomain-api/pupil/"
                 + str(pupil_id)
                 + "/daybook/day/"
@@ -135,12 +144,12 @@ def get_ht(date, message):
             write_to_log("RequestsError: {0}".format(error))
             return config.SOMETHING_WENT_WRONG
 
-    hometask = r.json()
+    hometask = request.json()
 
     try:
         for row in hometask["lessons"].keys():
             string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
-            if hometask["lessons"][row]["lesson_data"]["hometask"] == None:
+            if hometask["lessons"][row]["lesson_data"]["hometask"] is None:
                 string += "Ничего\n`"
             else:
                 string += hometask["lessons"][row]["lesson_data"]["hometask"]["text"]
@@ -171,9 +180,9 @@ def check(message):
     """
     Check if admin
     """
-    id = BOT.get_me().id
+    identificator = BOT.get_me().id
     if (
-        BOT.get_chat_member(message.chat.id, str(id)).can_delete_messages
+        BOT.get_chat_member(message.chat.id, str(identificator)).can_delete_messages
         or message.chat.type == "private"
     ):
         return True
@@ -182,20 +191,23 @@ def check(message):
 
 
 def check_for_creds(message):
-    try:
-        if len(message.text.split(" ")) == 2:
-            try:
-                message.reply_to_message.chat.id
-            except AttributeError:
-                return False
-            return True
-        return False
-    except:
-        return False
+    """
+    Check if message is answer to login request message.
+    """
+    if len(message.text.split(" ")) == 2:
+        try:
+            return message.reply_to_message.text == config.LOGIN_TEXT
+        except AttributeError:
+            return False
+        return True
+    return False
 
 
 @BOT.message_handler(commands=["start", "help"])
 def info(message):
+    """
+    Send message with info of bot.
+    """
     if not check(message):
         return
     BOT.reply_to(message, config.ABOUT, disable_notification=True)
@@ -203,14 +215,17 @@ def info(message):
 
 @BOT.message_handler(func=check_for_creds)
 def getting_token(message):
+    """
+    Authenticating user.
+    """
     token = get_token(*message.text.split(" "))
     if token == "Retry later":
         BOT.send_message(message.chat.id, config.RETRY_LATER)
         return
-    elif token == config.INCORRECT_CREDENTIALS:
+    if token == config.INCORRECT_CREDENTIALS:
         BOT.send_message(message.chat.id, config.INCORRECT_CREDENTIALS)
         return
-    elif token == "Network error":
+    if token == "Network error":
         BOT.send_message(message.chat.id, config.RETRY_LATER)
         return
     TOKENS[str(message.from_user.id)] = token
@@ -236,8 +251,8 @@ def getting_token(message):
             user_info["last_name"], user_info["first_name"], user_info["subdomain"]
         ),
     )
-    with open("database.json", "w") as fl:
-        json.dump(TOKENS, fl)
+    with open("database.json", "w") as fl_stream:
+        json.dump(TOKENS, fl_stream)
     if message.chat.type != "private":
         BOT.delete_message(
             message.reply_to_message.chat.id,
@@ -251,26 +266,35 @@ def getting_token(message):
 
 @BOT.message_handler(commands=["login"])
 def login(message):
+    """
+    Replying to /login command.
+    """
     if not check(message):
         return
     BOT.reply_to(message, config.LOGIN_TEXT, disable_notification=True)
 
 
 @BOT.message_handler(commands=["set"])
-def add_member(message):
+def set_default(message):
+    """
+    Setting default diary for chat.
+    """
     if not check(message):
         return
     if not str(message.from_user.id) in TOKENS.keys():
         BOT.reply_to(message, config.NO_INFO)
         return
     TOKENS[str(message.chat.id)] = TOKENS[str(message.from_user.id)]
-    with open("database.json", "w") as fl:
-        json.dump(TOKENS, fl)
+    with open("database.json", "w") as fl_stream:
+        json.dump(TOKENS, fl_stream)
     BOT.reply_to(message, "Ok", disable_notification=True)
 
 
 @BOT.message_handler(commands=["hometask"])
 def send_hometask(message):
+    """
+    Sending message with dates to choose.
+    """
     if not check(message):
         return
     today = datetime.date.today()
@@ -316,6 +340,9 @@ def send_hometask(message):
 
 @BOT.callback_query_handler(func=lambda call: True)
 def callback(call):
+    """
+    Answering for Telegram's callback.
+    """
     if len(call.data.split(" ")) == 3:
         start_of_week = datetime.datetime.strptime(
             str(call.data).split(" ")[0], "%d.%m.%y"
@@ -378,8 +405,8 @@ def callback(call):
                 disable_notification=True,
             )
             return
-        with open("log.txt", "a") as f:
-            f.write(
+        with open("log.txt", "a") as fl_stream:
+            fl_stream.write(
                 str(call.from_user.first_name)
                 + " "
                 + str(call.from_user.last_name)
