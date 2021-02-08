@@ -176,20 +176,6 @@ def get_ht(date, message):
 BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
 
 
-def check(message):
-    """
-    Check if admin
-    """
-    identificator = BOT.get_me().id
-    if (
-        BOT.get_chat_member(message.chat.id, str(identificator)).can_delete_messages
-        or message.chat.type == "private"
-    ):
-        return True
-    BOT.reply_to(message, config.NO_ADMIN)
-    return False
-
-
 def check_for_creds(message):
     """
     Check if message is answer to login request message.
@@ -208,8 +194,6 @@ def info(message):
     """
     Send message with info of bot.
     """
-    if not check(message):
-        return
     BOT.reply_to(message, config.ABOUT, disable_notification=True)
 
 
@@ -253,15 +237,6 @@ def getting_token(message):
     )
     with open("database.json", "w") as fl_stream:
         json.dump(TOKENS, fl_stream)
-    if message.chat.type != "private":
-        BOT.delete_message(
-            message.reply_to_message.chat.id,
-            message.reply_to_message.message_id,
-        )
-        BOT.delete_message(
-            message.chat.id,
-            message.message_id,
-        )
 
 
 @BOT.message_handler(commands=["login"])
@@ -269,9 +244,10 @@ def login(message):
     """
     Replying to /login command.
     """
-    if not check(message):
-        return
-    BOT.reply_to(message, config.LOGIN_TEXT, disable_notification=True)
+    if message.chat.type == "private":
+        BOT.reply_to(message, config.LOGIN_TEXT, disable_notification=True)
+    else:
+        BOT.reply_to(message, config.GROUP_NOT_ALLOWED, disable_notification=True)
 
 
 @BOT.message_handler(commands=["set"])
@@ -279,8 +255,6 @@ def set_default(message):
     """
     Setting default diary for chat.
     """
-    if not check(message):
-        return
     if not str(message.from_user.id) in TOKENS.keys():
         BOT.reply_to(message, config.NO_INFO)
         return
@@ -295,8 +269,6 @@ def send_hometask(message):
     """
     Sending message with dates to choose.
     """
-    if not check(message):
-        return
     today = datetime.date.today()
     start_of_week = today - datetime.timedelta(days=today.weekday())  # Monday
     keyboard = telebot.types.InlineKeyboardMarkup()
