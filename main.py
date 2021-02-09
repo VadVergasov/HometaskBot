@@ -180,7 +180,7 @@ def check_for_creds(message):
     """
     Check if message is answer to login request message.
     """
-    if len(message.text.split(" ")) == 2:
+    if message.text is not None and len(message.text.split(" ")) == 2:
         try:
             return message.reply_to_message.text == config.LOGIN_TEXT
         except AttributeError:
