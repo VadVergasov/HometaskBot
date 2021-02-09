@@ -4,3 +4,5 @@ __pycache__/
 hometasker_env/
 log.txt
 database.json
+cert.pem
+pkey.pem

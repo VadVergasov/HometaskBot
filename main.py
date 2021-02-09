@@ -18,7 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import datetime
 import json
 import os
+import time
 
+import flask
 import requests
 import telebot
 
@@ -29,6 +31,28 @@ if not os.path.isfile("database.json"):
         f.write("{}")
 with open("database.json", "r", encoding="utf-8") as f:
     TOKENS = json.load(f)
+
+WEBHOOK_URL_BASE = "https://%s:%s" % (config.WEBHOOK_HOST, config.WEBHOOK_PORT)
+WEBHOOK_URL_PATH = "/%s/" % (config.TG_TOKEN)
+
+BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
+
+app = flask.Flask(__name__)
+
+
+@app.route("/", methods=["GET", "HEAD"])
+def index():
+    return "Hello there!"
+
+
+@app.route(WEBHOOK_URL_PATH, methods=["POST"])
+def webhook():
+    if flask.request.headers.get("content-type") == "application/json":
+        json_string = flask.request.get_data().decode("utf-8")
+        update = telebot.types.Update.de_json(json_string)
+        BOT.process_new_updates([update])
+        return ""
+    flask.abort(403)
 
 
 def get_token(username, password):
@@ -181,9 +205,6 @@ def get_ht(date, message):
         return string
     except KeyError:
         return config.NOT_VALID
-
-
-BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
 
 
 def check_for_creds(message):
@@ -471,4 +492,18 @@ for command in config.COMMANDS.keys():
 
 BOT.set_my_commands(commands)
 
-BOT.polling()
+BOT.remove_webhook()
+
+time.sleep(0.1)
+
+BOT.set_webhook(
+    url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
+    certificate=open(config.WEBHOOK_SSL_CERT, "r"),
+)
+
+app.run(
+    host=config.WEBHOOK_LISTEN,
+    port=config.WEBHOOK_PORT,
+    ssl_context=(config.WEBHOOK_SSL_CERT, config.WEBHOOK_SSL_PRIV),
+    debug=False,
+)
