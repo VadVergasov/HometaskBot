@@ -154,6 +154,16 @@ def get_ht(date, message):
             else:
                 string += hometask["lessons"][row]["lesson_data"]["hometask"]["text"]
                 if (
+                    not "not_transferred" in hometask["lessons"][row]["lesson_data"]
+                    or not "theme.text"
+                    in hometask["lessons"][row]["lesson_data"]["not_transferred"]
+                ):
+                    if hometask["lessons"][row]["lesson_data"]["theme"] is not None:
+                        string += (
+                            " Тема: "
+                            + hometask["lessons"][row]["lesson_data"]["theme"]["text"]
+                        )
+                if (
                     len(
                         hometask["lessons"][row]["lesson_data"]["hometask"][
                             "attachments"
