@@ -204,6 +204,43 @@ def info(message):
     """
     Send message with info of bot.
     """
+    if (
+        str(message.chat.id) in TOKENS.keys()
+        or str(message.from_user.id) in TOKENS.keys()
+    ):
+        token = None
+        if not str(message.from_user.id) in TOKENS.keys():
+            token = TOKENS[str(message.chat.id)]
+        else:
+            token = TOKENS[str(message.from_user.id)]
+        tries = 0
+        headers = {"Authorization": "Token " + token + " "}
+        request = requests.get(
+            "https://schools.by/subdomain-api/user/current", headers=headers
+        )
+        while request.status_code != 200 and tries < 10:
+            request = requests.get(
+                "https://schools.by/subdomain-api/user/current", headers=headers
+            )
+            tries += 1
+        if request.status_code != 200:
+            write_to_log(
+                "String 221 request status isn't equal to 200\n"
+                + str(request.text)
+                + "\n"
+            )
+            BOT.reply_to(
+                message, config.SOMETHING_WENT_WRONG, disable_notification=True
+            )
+            return
+        user_info = request.json()
+        BOT.reply_to(
+            message,
+            config.LOGIN_INFO.format(
+                user_info["last_name"], user_info["first_name"], user_info["subdomain"]
+            ),
+            disable_notification=True,
+        )
     BOT.reply_to(message, config.ABOUT, disable_notification=True)
 
 
