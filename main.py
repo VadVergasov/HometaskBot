@@ -87,6 +87,20 @@ def get_token(username, password):
         return "Network error"
 
 
+def check_if_logined(message):
+    """
+    Check if logined and return token.
+    """
+    token = None
+    if not str(message.from_user.id) in TOKENS.keys():
+        if not str(message.chat.id) in TOKENS.keys():
+            return config.NO_INFO
+        token = TOKENS[str(message.chat.id)]
+    else:
+        token = TOKENS[str(message.from_user.id)]
+    return token
+
+
 def write_to_log(message):
     """
     Writing messages to log.
@@ -119,13 +133,9 @@ def get_ht(date, message):
         date.split(".")[0],
     )
 
-    token = None
-    if not str(message.from_user.id) in TOKENS.keys():
-        if not str(message.chat.id) in TOKENS.keys():
-            return config.NO_INFO
-        token = TOKENS[str(message.chat.id)]
-    else:
-        token = TOKENS[str(message.from_user.id)]
+    token = check_if_logined(message)
+    if token == config.NO_INFO:
+        return token
 
     headers = {"Authorization": "Token " + token + " "}
 
@@ -229,11 +239,7 @@ def info(message):
         str(message.chat.id) in TOKENS.keys()
         or str(message.from_user.id) in TOKENS.keys()
     ):
-        token = None
-        if not str(message.from_user.id) in TOKENS.keys():
-            token = TOKENS[str(message.chat.id)]
-        else:
-            token = TOKENS[str(message.from_user.id)]
+        token = check_if_logined(message)
         tries = 0
         headers = {"Authorization": "Token " + token + " "}
         request = requests.get(
@@ -305,6 +311,134 @@ def getting_token(message):
     )
     with open("database.json", "w") as fl_stream:
         json.dump(TOKENS, fl_stream)
+
+
+def get_makrs(date, token):
+    """
+    Getting marks.
+    """
+    date = date - datetime.timedelta(days=date.weekday())
+    headers = {"Authorization": "Token " + token + " "}
+    request = requests.get(
+        "https://schools.by/subdomain-api/user/current", headers=headers
+    )
+    tries = 0
+    while request.status_code != 200 and tries < 10:
+        request = requests.get(
+            "https://schools.by/subdomain-api/user/current", headers=headers
+        )
+        tries += 1
+    if request.status_code != 200:
+        write_to_log(
+            "String 326 request status isn't equal to 200\n" + str(request.text) + "\n"
+        )
+        return config.SOMETHING_WENT_WRONG
+    user_info = request.json()
+
+    pupil_id = user_info["id"]
+
+    marks = dict()
+
+    week = dict()
+    while "holidays" not in week.keys():
+        date -= datetime.timedelta(days=7)
+        tries = 0
+        request = requests.get(
+            "https://schools.by/subdomain-api/pupil/"
+            + str(pupil_id)
+            + "/daybook/week/"
+            + date.strftime("%Y-%m-%d")
+        )
+        while request.status_code != 200 and tries < 10:
+            request = requests.get(
+                "https://schools.by/subdomain-api/pupil/"
+                + str(pupil_id)
+                + "/daybook/week/"
+                + date.strftime("%Y-%m-%d"),
+                headers=headers,
+            )
+            tries += 1
+        if request.status_code != 200:
+            write_to_log(
+                "String 351 request status isn't equal to 200\n"
+                + str(request.text)
+                + "\n"
+            )
+            return config.SOMETHING_WENT_WRONG
+        week = request.json()
+
+    date += datetime.timedelta(days=7)
+
+    week = dict()
+
+    while "holidays" not in week.keys():
+        tries = 0
+        request = requests.get(
+            "https://schools.by/subdomain-api/pupil/"
+            + str(pupil_id)
+            + "/daybook/week/"
+            + date.strftime("%Y-%m-%d")
+        )
+        while request.status_code != 200 and tries < 10:
+            request = requests.get(
+                "https://schools.by/subdomain-api/pupil/"
+                + str(pupil_id)
+                + "/daybook/week/"
+                + date.strftime("%Y-%m-%d"),
+                headers=headers,
+            )
+            tries += 1
+        if request.status_code != 200:
+            write_to_log(
+                "String 351 request status isn't equal to 200\n"
+                + str(request.text)
+                + "\n"
+            )
+            return config.SOMETHING_WENT_WRONG
+        week = request.json()
+
+        if "holidays" in week.keys():
+            break
+
+        for day in week.keys():
+            for lesson in week[day]["lessons"].keys():
+                if (
+                    week[day]["lessons"][lesson]["mark"] == "н"
+                    or week[day]["lessons"][lesson]["mark"] is None
+                    or week[day]["lessons"][lesson]["mark"] == ""
+                ):
+                    continue
+                if week[day]["lessons"][lesson]["subject"] not in marks.keys():
+                    marks[week[day]["lessons"][lesson]["subject"]] = list()
+                marks[week[day]["lessons"][lesson]["subject"]].append(
+                    week[day]["lessons"][lesson]["mark"]
+                )
+
+        date += datetime.timedelta(days=7)
+    answer = ""
+    for lesson in marks.keys():
+        answer += "`" + str(lesson) + ": "
+        for mark in marks[lesson]:
+            answer += mark + " "
+        answer = answer[:-1]
+        answer += "\n`"
+    return answer
+
+
+@BOT.message_handler(commands=["marks"])
+def get_marks(message):
+    """
+    Replying to message in Telegram.
+    """
+    if message.chat.type != "private":
+        BOT.reply_to(message, config.GROUP_NOT_ALLOWED)
+        return
+    if not str(message.from_user.id) in TOKENS.keys():
+        BOT.reply_to(message, config.NO_INFO)
+        return
+    token = check_if_logined(message)
+    current = datetime.date.today()
+    BOT.reply_to(message, get_makrs(current, token), disable_notification=True)
 
 
 @BOT.message_handler(commands=["login"])
@@ -494,7 +628,7 @@ BOT.set_my_commands(commands)
 
 BOT.remove_webhook()
 
-time.sleep(0.1)
+time.sleep(1)
 
 BOT.set_webhook(
     url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,

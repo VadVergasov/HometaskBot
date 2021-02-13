@@ -16,6 +16,7 @@ COMMANDS = {
     "hometask": "Request hometask.",
     "set": "Set default diary for group to person's, that called command, diary.",
     "login": "Login to the platform.",
+    "marks": "Get marks in quarter",
 }
 NO_ADMIN = (
     "Bot requires /"Delete messages/" permission to run in group chat."
