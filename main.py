@@ -15,8 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import collections
 import datetime
 import json
+import logging
 import os
 import time
 
@@ -25,6 +27,8 @@ import requests
 import telebot
 
 import config
+
+logging.basicConfig(filename="logging.log", level=logging.DEBUG)
 
 if not os.path.isfile("database.json"):
     with open("database.json", "w") as f:
@@ -105,8 +109,7 @@ def write_to_log(message):
     """
     Writing messages to log.
     """
-    with open("log.txt", "a+") as fl_stream:
-        fl_stream.write(str(message) + "\n")
+    logging.warning(str(datetime.datetime.today()) + ": " + str(message) + "\n")
 
 
 def check_date(date):
@@ -313,7 +316,7 @@ def getting_token(message):
         json.dump(TOKENS, fl_stream)
 
 
-def get_makrs(date, token):
+def get_quarter(date, token):
     """
     Getting marks.
     """
@@ -415,6 +418,9 @@ def get_makrs(date, token):
                 )
 
         date += datetime.timedelta(days=7)
+
+    marks = collections.OrderedDict(sorted(marks.items()))
+
     answer = ""
     for lesson in marks.keys():
         answer += "`" + str(lesson) + ": "
@@ -438,7 +444,7 @@ def get_marks(message):
         return
     token = check_if_logined(message)
     current = datetime.date.today()
-    BOT.reply_to(message, get_makrs(current, token), disable_notification=True)
+    BOT.reply_to(message, get_quarter(current, token))
 
 
 @BOT.message_handler(commands=["login"])

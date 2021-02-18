@@ -3,6 +3,7 @@ config.py
 __pycache__/
 hometasker_env/
 log.txt
+logging.log
 database.json
 cert.pem
 pkey.pem
