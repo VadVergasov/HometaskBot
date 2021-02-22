@@ -29,7 +29,7 @@ NO_ADMIN = (
 )
 LOGIN_TEXT = "Reply to this message with your's username and password in according format (username password)"
 RETRY_LATER = "Retry later."
-LOGGED_IN = "You've logged in as {0} {1}, from {2}. Delete message with your credentials for privacy reasons!"
+LOGGED_IN = "You've logged in as {0} {1}, from {2}."
 INCORRECT_CREDENTIALS = "You've entered wrong username or password."
 GROUP_NOT_ALLOWED = "You can't use this command in group chat. Please, login by sending this command to bot's DM."
 LOGIN_INFO = "You've logged in as {0} {1} from {2}."

@@ -23,10 +23,10 @@ import os
 import time
 
 import flask
-import requests
 import telebot
 
 import config
+from api import auth, get_info, get_hometask, get_week
 
 logging.basicConfig(filename="logging.log", level=logging.DEBUG)
 
@@ -57,57 +57,22 @@ def webhook():
     flask.abort(403)
 
 
-def get_token(username, password):
-    """
-    Getting token to access schools.by API.
-    """
-    try:
-        tries = 0
-        request = requests.post(
-            "https://schools.by/api/auth",
-            data={"username": username, "password": password},
-        )
-        while tries < 10 and request.status_code == 200:
-            try:
-                if (
-                    request.json()["details"]
-                    == "Невозможно войти с предоставленными учетными данными."
-                ):
-                    return config.INCORRECT_CREDENTIALS
-            except:
-                pass
-            request = requests.post(
-                "https://schools.by/api/auth",
-                data={"username": username, "password": password},
-            )
-            tries += 1
-        if request.status_code != 200:
-            return "Retry later"
-        token = request.json()["token"]
-        return token
-    except ConnectionResetError:
-        return "Network error"
-
-
 def check_if_logined(message):
     """
     Check if logined and return token.
     """
-    token = None
     if not str(message.from_user.id) in TOKENS.keys():
         if not str(message.chat.id) in TOKENS.keys():
-            return config.NO_INFO
-        token = TOKENS[str(message.chat.id)]
-    else:
-        token = TOKENS[str(message.from_user.id)]
-    return token
+            return False
+        return str(message.chat.id)
+    return str(message.from_user.id)
 
 
 def write_to_log(message):
     """
     Writing messages to log.
     """
-    logging.warning(str(datetime.datetime.today()) + ": " + str(message) + "\n")
+    logging.error("%s: %s", str(datetime.datetime.today()), str(message))
 
 
 def check_date(date):
@@ -127,61 +92,15 @@ def get_ht(date, message):
     """
     Get hometask by date.
     """
-    string = ""
-    year, month, day = (
-        "20" + str(date.split(".")[2]),
-        date.split(".")[1],
-        date.split(".")[0],
-    )
+    if not check_if_logined(message):
+        return config.NO_INFO
 
-    token = check_if_logined(message)
-    if token == config.NO_INFO:
-        return token
+    pupil_id = TOKENS[check_if_logined(message)]["user_info"]["id"]
 
-    headers = {"Authorization": "Token " + token + " "}
-
-    request = requests.get(
-        "https://schools.by/subdomain-api/user/current", headers=headers
-    )
-    tries = 0
-    while request.status_code != 200 and tries < 10:
-        request = requests.get(
-            "https://schools.by/subdomain-api/user/current", headers=headers
-        )
-        tries += 1
-    if request.status_code != 200:
-        write_to_log(
-            "String 99 request status isn't equal to 200\n" + str(request.text) + "\n"
-        )
-        return config.SOMETHING_WENT_WRONG
-    user_info = request.json()
-
-    pupil_id = user_info["id"]
+    hometask = get_hometask(TOKENS[check_if_logined(message)]["token"], date, pupil_id)
 
     try:
-        request = requests.get(
-            "https://schools.by/subdomain-api/pupil/"
-            + str(pupil_id)
-            + "/daybook/day/"
-            + str(year + "-" + month + "-" + day),
-            headers=headers,
-        )
-    except requests.exceptions.ConnectionError:
-        try:
-            request = requests.get(
-                "https://schools.by/subdomain-api/pupil/"
-                + str(pupil_id)
-                + "/daybook/day/"
-                + str(year + "-" + month + "-" + day),
-                headers=headers,
-            )
-        except requests.exceptions.ConnectionError as error:
-            write_to_log("RequestsError: {0}".format(error))
-            return config.SOMETHING_WENT_WRONG
-
-    hometask = request.json()
-
-    try:
+        string = ""
         for row in hometask["lessons"].keys():
             string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
             if hometask["lessons"][row]["lesson_data"]["hometask"] is None:
@@ -236,36 +155,15 @@ def info(message):
     """
     Send message with info of bot.
     """
-    if (
-        str(message.chat.id) in TOKENS.keys()
-        or str(message.from_user.id) in TOKENS.keys()
-    ):
-        token = check_if_logined(message)
-        tries = 0
-        headers = {"Authorization": "Token " + token + " "}
-        request = requests.get(
-            "https://schools.by/subdomain-api/user/current", headers=headers
-        )
-        while request.status_code != 200 and tries < 10:
-            request = requests.get(
-                "https://schools.by/subdomain-api/user/current", headers=headers
-            )
-            tries += 1
-        if request.status_code != 200:
-            write_to_log(
-                "String 221 request status isn't equal to 200\n"
-                + str(request.text)
-                + "\n"
-            )
-            BOT.reply_to(
-                message, config.SOMETHING_WENT_WRONG, disable_notification=True
-            )
-            return
-        user_info = request.json()
+    if check_if_logined(message):
+        user_info = TOKENS[check_if_logined(message)]["user_info"]
+
         BOT.reply_to(
             message,
             config.LOGIN_INFO.format(
-                user_info["last_name"], user_info["first_name"], user_info["subdomain"]
+                user_info["last_name"],
+                user_info["first_name"],
+                user_info["subdomain"],
             ),
             disable_notification=True,
         )
@@ -277,126 +175,57 @@ def getting_token(message):
     """
     Authenticating user.
     """
-    token = get_token(*message.text.split(" "))
-    if token == "Retry later":
-        BOT.send_message(message.chat.id, config.RETRY_LATER)
+    token = None
+    try:
+        token = auth(*message.text.split(" "))
+    except SystemError:
+        BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG)
+        BOT.delete_message(message.chat.id, message.message_id)
         return
-    if token == config.INCORRECT_CREDENTIALS:
-        BOT.send_message(message.chat.id, config.INCORRECT_CREDENTIALS)
-        return
-    if token == "Network error":
-        BOT.send_message(message.chat.id, config.RETRY_LATER)
-        return
-    TOKENS[str(message.from_user.id)] = token
-    tries = 0
-    headers = {"Authorization": "Token " + TOKENS[str(message.from_user.id)] + " "}
-    request = requests.get(
-        "https://schools.by/subdomain-api/user/current", headers=headers
+
+    TOKENS[str(message.from_user.id)] = dict()
+    TOKENS[str(message.from_user.id)]["token"] = token
+
+    TOKENS[str(message.from_user.id)]["user_info"] = get_info(
+        TOKENS[str(message.from_user.id)]["token"]
     )
-    while request.status_code != 200 and tries < 10:
-        request = requests.get(
-            "https://schools.by/subdomain-api/user/current", headers=headers
-        )
-        tries += 1
-    if request.status_code != 200:
-        write_to_log(
-            "String 211 request status isn't equal to 200\n" + str(request.text) + "\n"
-        )
-        return config.SOMETHING_WENT_WRONG
-    user_info = request.json()
+
     BOT.send_message(
         message.chat.id,
         config.LOGGED_IN.format(
-            user_info["last_name"], user_info["first_name"], user_info["subdomain"]
+            TOKENS[str(message.from_user.id)]["user_info"]["last_name"],
+            TOKENS[str(message.from_user.id)]["user_info"]["first_name"],
+            TOKENS[str(message.from_user.id)]["user_info"]["subdomain"],
         ),
     )
+    BOT.delete_message(message.chat.id, message.message_id)
     with open("database.json", "w") as fl_stream:
         json.dump(TOKENS, fl_stream)
 
 
-def get_quarter(date, token):
+def get_quarter(key):
     """
     Getting marks.
     """
-    date = date - datetime.timedelta(days=date.weekday())
-    headers = {"Authorization": "Token " + token + " "}
-    request = requests.get(
-        "https://schools.by/subdomain-api/user/current", headers=headers
+    date = datetime.date.today() - datetime.timedelta(
+        days=datetime.date.today().weekday()
     )
-    tries = 0
-    while request.status_code != 200 and tries < 10:
-        request = requests.get(
-            "https://schools.by/subdomain-api/user/current", headers=headers
-        )
-        tries += 1
-    if request.status_code != 200:
-        write_to_log(
-            "String 326 request status isn't equal to 200\n" + str(request.text) + "\n"
-        )
-        return config.SOMETHING_WENT_WRONG
-    user_info = request.json()
 
-    pupil_id = user_info["id"]
+    pupil_id = TOKENS[key]["user_info"]["id"]
 
     marks = dict()
 
     week = dict()
     while "holidays" not in week.keys():
+        week = get_week(TOKENS[key]["token"], date, pupil_id)
         date -= datetime.timedelta(days=7)
-        tries = 0
-        request = requests.get(
-            "https://schools.by/subdomain-api/pupil/"
-            + str(pupil_id)
-            + "/daybook/week/"
-            + date.strftime("%Y-%m-%d")
-        )
-        while request.status_code != 200 and tries < 10:
-            request = requests.get(
-                "https://schools.by/subdomain-api/pupil/"
-                + str(pupil_id)
-                + "/daybook/week/"
-                + date.strftime("%Y-%m-%d"),
-                headers=headers,
-            )
-            tries += 1
-        if request.status_code != 200:
-            write_to_log(
-                "String 351 request status isn't equal to 200\n"
-                + str(request.text)
-                + "\n"
-            )
-            return config.SOMETHING_WENT_WRONG
-        week = request.json()
 
-    date += datetime.timedelta(days=7)
+    date += datetime.timedelta(days=14)
 
     week = dict()
 
     while "holidays" not in week.keys():
-        tries = 0
-        request = requests.get(
-            "https://schools.by/subdomain-api/pupil/"
-            + str(pupil_id)
-            + "/daybook/week/"
-            + date.strftime("%Y-%m-%d")
-        )
-        while request.status_code != 200 and tries < 10:
-            request = requests.get(
-                "https://schools.by/subdomain-api/pupil/"
-                + str(pupil_id)
-                + "/daybook/week/"
-                + date.strftime("%Y-%m-%d"),
-                headers=headers,
-            )
-            tries += 1
-        if request.status_code != 200:
-            write_to_log(
-                "String 351 request status isn't equal to 200\n"
-                + str(request.text)
-                + "\n"
-            )
-            return config.SOMETHING_WENT_WRONG
-        week = request.json()
+        week = get_week(TOKENS[key]["token"], date, pupil_id)
 
         if "holidays" in week.keys():
             break
@@ -437,12 +266,10 @@ def get_marks(message):
     if message.chat.type != "private":
         BOT.reply_to(message, config.GROUP_NOT_ALLOWED)
         return
-    if not str(message.from_user.id) in TOKENS.keys():
+    if not check_if_logined(message):
         BOT.reply_to(message, config.NO_INFO)
         return
-    token = check_if_logined(message)
-    current = datetime.date.today()
-    BOT.reply_to(message, get_quarter(current, token))
+    BOT.reply_to(message, get_quarter(check_if_logined(message)))
 
 
 @BOT.message_handler(commands=["login"])
