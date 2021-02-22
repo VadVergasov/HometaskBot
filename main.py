@@ -200,7 +200,7 @@ def getting_token(message):
     )
     BOT.delete_message(message.chat.id, message.message_id)
     with open("database.json", "w") as fl_stream:
-        json.dump(TOKENS, fl_stream)
+        json.dump(TOKENS, fl_stream, ensure_ascii=False)
 
 
 def get_quarter(key):
@@ -288,12 +288,12 @@ def set_default(message):
     """
     Setting default diary for chat.
     """
-    if not str(message.from_user.id) in TOKENS.keys():
+    if not check_if_logined(message):
         BOT.reply_to(message, config.NO_INFO)
         return
     TOKENS[str(message.chat.id)] = TOKENS[str(message.from_user.id)]
     with open("database.json", "w") as fl_stream:
-        json.dump(TOKENS, fl_stream)
+        json.dump(TOKENS, fl_stream, ensure_ascii=False)
     BOT.reply_to(message, "Ok", disable_notification=True)
 
 
