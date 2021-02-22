@@ -1,4 +1,10 @@
 TG_TOKEN = "Your telegram bot token" #change is required
+WEBHOOK_HOST = "1.2.3.4"
+WEBHOOK_PORT = 8443 # Should be 80, 88, 443, 8443. On this port Telegram will send requests.
+WEBHOOK_LISTEN = "127.0.0.1"
+WEBHOOK_SSL_CERT = "./cert.pem"  # Path to the ssl certificate
+WEBHOOK_SSL_PRIV = "./pkey.pem"  # Path to the ssl private key
+LISTEN_PORT = 12345  # Port, where flask will be listen.
 INCORRECT_FORMAT = "Invalid command format."
 NOT_VALID = "You've entered non-school day."
 NO_DATE = "Date is not present or present wrongly."

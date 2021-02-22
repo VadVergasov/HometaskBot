@@ -1,4 +1,10 @@
 TG_TOKEN = "{str}"
+WEBHOOK_HOST = "{str}"
+WEBHOOK_PORT = {int}
+WEBHOOK_LISTEN = "{str}"
+WEBHOOK_SSL_CERT = "{str}"
+WEBHOOK_SSL_PRIV = "{str}"
+LISTEN_PORT = {int}
 INCORRECT_FORMAT = "{str}"
 NOT_VALID = "{str}"
 NO_DATE = "{str}"
@@ -16,6 +22,7 @@ COMMANDS = {
     "hometask": "{str}",
     "set": "{str}",
     "login": "{str}",
+    "marks": {str},
 }
 NO_ADMIN = (
     "{str}"

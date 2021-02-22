@@ -1,4 +1,10 @@
 TG_TOKEN = "Ваш токен" #необходимо изменить.
+WEBHOOK_HOST = "1.2.3.4"
+WEBHOOK_PORT = 8443 # Должен быть 80, 88, 443, 8443. На этот порт Телеграм будет отправлять запросы.
+WEBHOOK_LISTEN = "127.0.0.1"
+WEBHOOK_SSL_CERT = "./cert.pem"  # Path to the ssl certificate
+WEBHOOK_SSL_PRIV = "./pkey.pem"  # Path to the ssl private key
+LISTEN_PORT = 12345  # На этом порту flask будет слушать запросы
 INCORRECT_FORMAT = "Неверный формат команды."
 NOT_VALID = "Указан неучебный день."
 NO_DATE = "Не указана дата или указана неверно."
