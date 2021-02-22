@@ -57,9 +57,9 @@ def webhook():
     flask.abort(403)
 
 
-def check_if_logined(message):
+def check_if_logged(message):
     """
-    Check if logined and return token.
+    Check if logged and return id for TOKENS dict.
     """
     if not str(message.from_user.id) in TOKENS.keys():
         if not str(message.chat.id) in TOKENS.keys():
@@ -92,12 +92,12 @@ def get_ht(date, message):
     """
     Get hometask by date.
     """
-    if not check_if_logined(message):
+    if not check_if_logged(message):
         return config.NO_INFO
 
-    pupil_id = TOKENS[check_if_logined(message)]["user_info"]["id"]
+    pupil_id = TOKENS[check_if_logged(message)]["user_info"]["id"]
 
-    hometask = get_hometask(TOKENS[check_if_logined(message)]["token"], date, pupil_id)
+    hometask = get_hometask(TOKENS[check_if_logged(message)]["token"], date, pupil_id)
 
     try:
         string = ""
@@ -155,8 +155,8 @@ def info(message):
     """
     Send message with info of bot.
     """
-    if check_if_logined(message):
-        user_info = TOKENS[check_if_logined(message)]["user_info"]
+    if check_if_logged(message):
+        user_info = TOKENS[check_if_logged(message)]["user_info"]
 
         BOT.reply_to(
             message,
@@ -266,10 +266,10 @@ def get_marks(message):
     if message.chat.type != "private":
         BOT.reply_to(message, config.GROUP_NOT_ALLOWED)
         return
-    if not check_if_logined(message):
+    if not check_if_logged(message):
         BOT.reply_to(message, config.NO_INFO)
         return
-    BOT.reply_to(message, get_quarter(check_if_logined(message)))
+    BOT.reply_to(message, get_quarter(check_if_logged(message)))
 
 
 @BOT.message_handler(commands=["login"])
@@ -288,7 +288,7 @@ def set_default(message):
     """
     Setting default diary for chat.
     """
-    if not check_if_logined(message):
+    if not check_if_logged(message):
         BOT.reply_to(message, config.NO_INFO)
         return
     TOKENS[str(message.chat.id)] = TOKENS[str(message.from_user.id)]
