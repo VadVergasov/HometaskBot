@@ -44,13 +44,11 @@ BOT = telebot.TeleBot(config.TG_TOKEN, parse_mode="MARKDOWN")
 app = flask.Flask(__name__)
 
 
-@app.route("/", methods=["GET", "HEAD"])
-def index():
-    return "Hello there!"
-
-
 @app.route(WEBHOOK_URL_PATH, methods=["POST"])
 def webhook():
+    """
+    Processing requests from Telegram.
+    """
     if flask.request.headers.get("content-type") == "application/json":
         json_string = flask.request.get_data().decode("utf-8")
         update = telebot.types.Update.de_json(json_string)
