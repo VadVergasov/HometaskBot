@@ -17,14 +17,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import logging
 
-import requests
 
-
-def auth(username, password):
+def auth(username, password, session):
     """
     Authinticating and getting token.
     """
-    request = requests.post(
+    request = session.post(
         "https://schools.by/api/auth",
         data={"username": username, "password": password},
     )
@@ -35,12 +33,12 @@ def auth(username, password):
     return token
 
 
-def get_info(token):
+def get_info(token, session):
     """
     Get user info from schools.by
     """
     headers = {"Authorization": "Token " + token + " "}
-    request = requests.get(
+    request = session.get(
         "https://schools.by/subdomain-api/user/current", headers=headers
     )
     if request.status_code != 200:
@@ -49,12 +47,12 @@ def get_info(token):
     return request.json()
 
 
-def get_pupils(token, parent_id):
+def get_pupils(token, parent_id, session):
     """
     Get all pupil_ids by parent_id
     """
     headers = {"Authorization": "Token " + token + " "}
-    request = requests.get(
+    request = session.get(
         "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils/",
         headers=headers,
     )
@@ -64,7 +62,7 @@ def get_pupils(token, parent_id):
     return request.json()
 
 
-def get_hometask(token, date, pupil_id):
+def get_hometask(token, date, pupil_id, session):
     """
     Get hometask by date for pupil
     """
@@ -74,7 +72,7 @@ def get_hometask(token, date, pupil_id):
         date.split(".")[0],
     )
     headers = {"Authorization": "Token " + token + " "}
-    request = requests.get(
+    request = session.get(
         "https://schools.by/subdomain-api/pupil/"
         + str(pupil_id)
         + "/daybook/day/"
@@ -87,12 +85,12 @@ def get_hometask(token, date, pupil_id):
     return request.json()
 
 
-def get_week(token, date, pupil_id):
+def get_week(token, date, pupil_id, session):
     """
     Get hometask on week.
     """
     headers = {"Authorization": "Token " + token + " "}
-    request = requests.get(
+    request = session.get(
         "https://schools.by/subdomain-api/pupil/"
         + str(pupil_id)
         + "/daybook/week/"

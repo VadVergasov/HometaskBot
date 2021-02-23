@@ -24,6 +24,7 @@ import time
 
 import flask
 import telebot
+import requests
 
 import config
 from api import auth, get_hometask, get_info, get_pupils, get_week
@@ -111,7 +112,12 @@ def get_ht(date, message):
         pupil_id = TOKENS[check_if_logged(message)]["user_info"]["id"]
 
     logging.debug("Trying to get home task")
-    hometask = get_hometask(TOKENS[check_if_logged(message)]["token"], date, pupil_id)
+
+    session = requests.Session()
+
+    hometask = get_hometask(
+        TOKENS[check_if_logged(message)]["token"], date, pupil_id, session
+    )
 
     try:
         logging.debug("Forming answer with home task")
@@ -188,9 +194,11 @@ def get_quarter(key):
 
     week = dict()
 
+    session = requests.Session()
+
     logging.debug("Looking for a start of quarter")
     while "holidays" not in week.keys():
-        week = get_week(TOKENS[key]["token"], date, pupil_id)
+        week = get_week(TOKENS[key]["token"], date, pupil_id, session)
         date -= datetime.timedelta(days=7)
 
     date += datetime.timedelta(days=14)
@@ -199,7 +207,7 @@ def get_quarter(key):
 
     logging.debug("Looking for an end of quarter")
     while "holidays" not in week.keys():
-        week = get_week(TOKENS[key]["token"], date, pupil_id)
+        week = get_week(TOKENS[key]["token"], date, pupil_id, session)
 
         if "holidays" in week.keys():
             break
@@ -264,8 +272,9 @@ def getting_token(message):
     """
     token = None
     logging.debug("Trying to auth user")
+    session = requests.Session()
     try:
-        token = auth(*message.text.split(" "))
+        token = auth(*message.text.split(" "), session)
     except SystemError:
         logging.debug("SystemError on auth")
         logging.debug(BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG))
@@ -276,12 +285,12 @@ def getting_token(message):
     TOKENS[str(message.from_user.id)]["token"] = token
 
     TOKENS[str(message.from_user.id)]["user_info"] = get_info(
-        TOKENS[str(message.from_user.id)]["token"]
+        TOKENS[str(message.from_user.id)]["token"], session
     )
 
     if TOKENS[str(message.from_user.id)]["user_info"]["type"] == "Parent":
         TOKENS[str(message.from_user.id)]["pupils"] = get_pupils(
-            token, TOKENS[str(message.from_user.id)]["user_info"]["id"]
+            token, TOKENS[str(message.from_user.id)]["user_info"]["id"], session
         )
 
     logging.debug("Replying, that user is authenticated")
