@@ -26,7 +26,7 @@ import flask
 import telebot
 
 import config
-from api import auth, get_info, get_hometask, get_week
+from api import auth, get_hometask, get_info, get_pupils, get_week
 
 logging.basicConfig(filename="logging.log", level=logging.DEBUG)
 
@@ -100,7 +100,13 @@ def get_ht(date, message):
     if not check_if_logged(message):
         return config.NO_INFO
 
-    pupil_id = TOKENS[check_if_logged(message)]["user_info"]["id"]
+    if TOKENS[check_if_logged(message)]["user_info"]["type"] == "Parent":
+        try:
+            pupil_id = TOKENS[check_if_logged(message)][ "current"]
+        except KeyError:
+            return config.PUPIL_NOT_SELECTED
+    else:
+        pupil_id = TOKENS[check_if_logged(message)]["user_info"]["id"]
 
     hometask = get_hometask(TOKENS[check_if_logged(message)]["token"], date, pupil_id)
 
@@ -250,6 +256,11 @@ def getting_token(message):
         TOKENS[str(message.from_user.id)]["token"]
     )
 
+    if TOKENS[str(message.from_user.id)]["user_info"]["type"] == "Parent":
+        TOKENS[str(message.from_user.id)]["pupils"] = get_pupils(
+            token, TOKENS[str(message.from_user.id)]["user_info"]["id"]
+        )
+
     BOT.send_message(
         message.chat.id,
         config.LOGGED_IN.format(
@@ -347,12 +358,49 @@ def send_hometask(message):
     )
 
 
+@BOT.message_handler(commands=["select"])
+def select_pupil(message):
+    """
+    Selecting pupil.
+    """
+    if not check_if_logged(message):
+        BOT.reply_to(message, config.NO_INFO)
+        return
+    if TOKENS[check_if_logged(message)]["user_info"]["type"] != "Parent":
+        BOT.reply_to(message, config.NOT_A_PARENT)
+        return
+    keyboard = telebot.types.InlineKeyboardMarkup()
+    logging.debug(TOKENS[check_if_logged(message)]["pupils"])
+    for pupil in TOKENS[check_if_logged(message)]["pupils"]:
+        keyboard.add(
+            telebot.types.InlineKeyboardButton(
+                text=pupil["last_name"] + " " + pupil["first_name"],
+                callback_data="ID: " + str(pupil["id"]),
+            )
+        )
+    BOT.reply_to(
+        message, config.CHOOSE_PUPIL, reply_markup=keyboard, disable_notification=True
+    )
+
+
 @BOT.callback_query_handler(func=lambda call: True)
 def callback(call):
     """
     Answering for Telegram's callback.
     """
-    if len(call.data.split(" ")) == 3:
+    if call.data[:3] == "ID:":
+        pupil_id = int(call.data.split(" ")[1])
+        TOKENS[check_if_logged(call.message.reply_to_message)]["current"] = pupil_id
+        update_config()
+        pupil_name = None
+        for pupil in TOKENS[check_if_logged(call.message.reply_to_message)]["pupils"]:
+            if int(pupil["id"]) == pupil_id:
+                pupil_name = pupil["last_name"] + " " + pupil["first_name"]
+                break
+        BOT.answer_callback_query(
+            call.id, show_alert=False, text=config.SELECTED_PUPIL.format(pupil_name)
+        )
+    elif len(call.data.split(" ")) == 3:
         start_of_week = datetime.datetime.strptime(
             str(call.data).split(" ")[0], "%d.%m.%y"
         )

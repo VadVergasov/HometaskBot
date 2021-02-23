@@ -27,10 +27,6 @@ To get hometask, you should type `/hometask`. That will return button list with 
 <!--more-->
 `/set` command is useful for using bot in group chat. Typing this command will link the group's diary to the diary of the person who sent the command. *Note. Person, who sent the command should have token, registered in bot (in simple words, logged into the bot)*
 
-Bad thing
------
-Entering parent's credentials and then asking for hometask will crash bot.
-
 License
 ------------
 Licensed under GPLv3. See LICENSE file.

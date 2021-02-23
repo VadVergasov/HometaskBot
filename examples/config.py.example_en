@@ -31,3 +31,9 @@ LOGGED_IN = "You've logged in as {0} {1}, from {2}."
 INCORRECT_CREDENTIALS = "You've entered the wrong username or password."
 GROUP_NOT_ALLOWED = "You can't use this command in group chat. Please, login by sending this command to the bot's DM."
 LOGIN_INFO = "You've logged in as {0} {1} from {2}."
+NOT_A_PARENT = "You aren't a parent, you can't choose a pupil."
+CHOOSE_PUPIL = "Choose a pupil:"
+SELECTED_PUPIL = "Pupil chose: {0}"
+PUPIL_NOT_SELECTED = (
+    "A pupil wasn't chosen. Use command /select to select the pupil."
+)

@@ -23,6 +23,7 @@ COMMANDS = {
     "set": "{str}",
     "login": "{str}",
     "marks": {str},
+    "select": "{str}",
 }
 LOGIN_TEXT = "{str}"
 RETRY_LATER = "{str}"
@@ -30,3 +31,7 @@ LOGGED_IN = "{str}"
 INCORRECT_CREDENTIALS = "{str}"
 GROUP_NOT_ALLOWED = "{str}"
 LOGIN_INFO = "{str}"
+NOT_A_PARENT = "{str}"
+CHOOSE_PUPIL = "{str}"
+SELECTED_PUPIL = "{str}"
+PUPIL_NOT_SELECTED = "{str}"
