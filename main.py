@@ -150,59 +150,6 @@ def check_for_creds(message):
     return False
 
 
-@BOT.message_handler(commands=["start", "help"])
-def info(message):
-    """
-    Send message with info of bot.
-    """
-    if check_if_logged(message):
-        user_info = TOKENS[check_if_logged(message)]["user_info"]
-
-        BOT.reply_to(
-            message,
-            config.LOGIN_INFO.format(
-                user_info["last_name"],
-                user_info["first_name"],
-                user_info["subdomain"],
-            ),
-            disable_notification=True,
-        )
-    BOT.reply_to(message, config.ABOUT, disable_notification=True)
-
-
-@BOT.message_handler(func=check_for_creds)
-def getting_token(message):
-    """
-    Authenticating user.
-    """
-    token = None
-    try:
-        token = auth(*message.text.split(" "))
-    except SystemError:
-        BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG)
-        BOT.delete_message(message.chat.id, message.message_id)
-        return
-
-    TOKENS[str(message.from_user.id)] = dict()
-    TOKENS[str(message.from_user.id)]["token"] = token
-
-    TOKENS[str(message.from_user.id)]["user_info"] = get_info(
-        TOKENS[str(message.from_user.id)]["token"]
-    )
-
-    BOT.send_message(
-        message.chat.id,
-        config.LOGGED_IN.format(
-            TOKENS[str(message.from_user.id)]["user_info"]["last_name"],
-            TOKENS[str(message.from_user.id)]["user_info"]["first_name"],
-            TOKENS[str(message.from_user.id)]["user_info"]["subdomain"],
-        ),
-    )
-    BOT.delete_message(message.chat.id, message.message_id)
-    with open("database.json", "w") as fl_stream:
-        json.dump(TOKENS, fl_stream, ensure_ascii=False)
-
-
 def get_quarter(key):
     """
     Getting marks.
@@ -256,6 +203,59 @@ def get_quarter(key):
         answer = answer[:-1]
         answer += "\n`"
     return answer
+
+
+@BOT.message_handler(commands=["start", "help"])
+def info(message):
+    """
+    Send message with info of bot.
+    """
+    if check_if_logged(message):
+        user_info = TOKENS[check_if_logged(message)]["user_info"]
+
+        BOT.reply_to(
+            message,
+            config.LOGIN_INFO.format(
+                user_info["last_name"],
+                user_info["first_name"],
+                user_info["subdomain"],
+            ),
+            disable_notification=True,
+        )
+    BOT.reply_to(message, config.ABOUT, disable_notification=True)
+
+
+@BOT.message_handler(func=check_for_creds)
+def getting_token(message):
+    """
+    Authenticating user.
+    """
+    token = None
+    try:
+        token = auth(*message.text.split(" "))
+    except SystemError:
+        BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG)
+        BOT.delete_message(message.chat.id, message.message_id)
+        return
+
+    TOKENS[str(message.from_user.id)] = dict()
+    TOKENS[str(message.from_user.id)]["token"] = token
+
+    TOKENS[str(message.from_user.id)]["user_info"] = get_info(
+        TOKENS[str(message.from_user.id)]["token"]
+    )
+
+    BOT.send_message(
+        message.chat.id,
+        config.LOGGED_IN.format(
+            TOKENS[str(message.from_user.id)]["user_info"]["last_name"],
+            TOKENS[str(message.from_user.id)]["user_info"]["first_name"],
+            TOKENS[str(message.from_user.id)]["user_info"]["subdomain"],
+        ),
+    )
+    BOT.delete_message(message.chat.id, message.message_id)
+    with open("database.json", "w") as fl_stream:
+        json.dump(TOKENS, fl_stream, ensure_ascii=False)
 
 
 @BOT.message_handler(commands=["marks"])

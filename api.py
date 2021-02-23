@@ -69,7 +69,7 @@ def get_hometask(token, date, pupil_id):
     Get hometask by date for pupil
     """
     year, month, day = (
-        "20" + str(date.split(".")[2]),
+        "20" + date.split(".")[2],
         date.split(".")[1],
         date.split(".")[0],
     )
