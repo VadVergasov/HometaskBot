@@ -24,9 +24,6 @@ COMMANDS = {
     "login": "Login to the platform.",
     "marks": "Get marks in quarter",
 }
-NO_ADMIN = (
-    "Bot requires /"Delete messages/" permission to run in group chat."
-)
 LOGIN_TEXT = "Reply to this message with your's username and password in according format (username password)"
 RETRY_LATER = "Retry later."
 LOGGED_IN = "You've logged in as {0} {1}, from {2}."

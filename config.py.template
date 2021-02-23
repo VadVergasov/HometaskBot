@@ -24,9 +24,6 @@ COMMANDS = {
     "login": "{str}",
     "marks": {str},
 }
-NO_ADMIN = (
-    "{str}"
-)
 LOGIN_TEXT = "{str}"
 RETRY_LATER = "{str}"
 LOGGED_IN = "{str}"
