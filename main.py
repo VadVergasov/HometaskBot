@@ -57,6 +57,11 @@ def webhook():
     flask.abort(403)
 
 
+def update_config():
+    with open("database.json", "w") as fl_stream:
+        json.dump(TOKENS, fl_stream, ensure_ascii=False)
+
+
 def check_if_logged(message):
     """
     Check if logged and return id for TOKENS dict.
@@ -254,8 +259,7 @@ def getting_token(message):
         ),
     )
     BOT.delete_message(message.chat.id, message.message_id)
-    with open("database.json", "w") as fl_stream:
-        json.dump(TOKENS, fl_stream, ensure_ascii=False)
+    update_config()
 
 
 @BOT.message_handler(commands=["marks"])
