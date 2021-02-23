@@ -98,8 +98,10 @@ def get_ht(date, message):
     Get hometask by date.
     """
     if not check_if_logged(message):
+        logging.debug("No info to get home task for user")
         return config.NO_INFO
 
+    logging.debug("Trying to get pupil_id for home task")
     if TOKENS[check_if_logged(message)]["user_info"]["type"] == "Parent":
         try:
             pupil_id = TOKENS[check_if_logged(message)]["current"]
@@ -108,9 +110,11 @@ def get_ht(date, message):
     else:
         pupil_id = TOKENS[check_if_logged(message)]["user_info"]["id"]
 
+    logging.debug("Trying to get home task")
     hometask = get_hometask(TOKENS[check_if_logged(message)]["token"], date, pupil_id)
 
     try:
+        logging.debug("Forming answer with home task")
         string = ""
         for row in hometask["lessons"].keys():
             string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
@@ -143,8 +147,10 @@ def get_ht(date, message):
                         string += "\n[Файл](" + str(attachment["file"]) + ")\n"
                 else:
                     string += "`\n"
+        logging.debug("Returning answer:\n%s", string)
         return string
     except KeyError:
+        logging.debug("Not a working day was requested")
         return config.NOT_VALID
 
 
@@ -169,6 +175,7 @@ def get_quarter(key):
         days=datetime.date.today().weekday()
     )
 
+    logging.debug("Trying to get pupil_id for marks")
     if TOKENS[key]["user_info"]["type"] == "Parent":
         try:
             pupil_id = TOKENS[key]["current"]
@@ -180,6 +187,8 @@ def get_quarter(key):
     marks = dict()
 
     week = dict()
+
+    logging.debug("Looking for a start of quarter")
     while "holidays" not in week.keys():
         week = get_week(TOKENS[key]["token"], date, pupil_id)
         date -= datetime.timedelta(days=7)
@@ -188,6 +197,7 @@ def get_quarter(key):
 
     week = dict()
 
+    logging.debug("Looking for an end of quarter")
     while "holidays" not in week.keys():
         week = get_week(TOKENS[key]["token"], date, pupil_id)
 
@@ -212,6 +222,7 @@ def get_quarter(key):
 
     marks = collections.OrderedDict(sorted(marks.items()))
 
+    logging.debug("Forming answer with marks")
     answer = ""
     for lesson in marks.keys():
         answer += "`" + str(lesson) + ": "
@@ -230,6 +241,7 @@ def info(message):
     if check_if_logged(message):
         user_info = TOKENS[check_if_logged(message)]["user_info"]
 
+        logging.debug("Sending info about user")
         BOT.reply_to(
             message,
             config.LOGIN_INFO.format(
@@ -239,6 +251,7 @@ def info(message):
             ),
             disable_notification=True,
         )
+    logging.debug("Sending help/start message")
     BOT.reply_to(message, config.ABOUT, disable_notification=True)
 
 
@@ -248,9 +261,11 @@ def getting_token(message):
     Authenticating user.
     """
     token = None
+    logging.debug("Trying to auth user")
     try:
         token = auth(*message.text.split(" "))
     except SystemError:
+        logging.debug("SystemError on auth")
         BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG)
         BOT.delete_message(message.chat.id, message.message_id)
         return
@@ -267,6 +282,7 @@ def getting_token(message):
             token, TOKENS[str(message.from_user.id)]["user_info"]["id"]
         )
 
+    logging.debug("Replying, that user is authenticated")
     BOT.send_message(
         message.chat.id,
         config.LOGGED_IN.format(
@@ -275,6 +291,7 @@ def getting_token(message):
             TOKENS[str(message.from_user.id)]["user_info"]["subdomain"],
         ),
     )
+    logging.debug("Deleting message with credentials")
     BOT.delete_message(message.chat.id, message.message_id)
     update_config()
 
@@ -285,11 +302,14 @@ def get_marks(message):
     Replying to message in Telegram.
     """
     if message.chat.type != "private":
+        logging.debug("Not a private chat, can't get marks")
         BOT.reply_to(message, config.GROUP_NOT_ALLOWED)
         return
     if not check_if_logged(message):
+        logging.debug("No info to get marks")
         BOT.reply_to(message, config.NO_INFO)
         return
+    logging.debug("Replying with marks")
     BOT.reply_to(message, get_quarter(check_if_logged(message)))
 
 
@@ -299,8 +319,10 @@ def login(message):
     Replying to /login command.
     """
     if message.chat.type == "private":
+        logging.debug("Not a private chat, can't log in")
         BOT.reply_to(message, config.LOGIN_TEXT, disable_notification=True)
     else:
+        logging.debug("Replying to a login message")
         BOT.reply_to(message, config.GROUP_NOT_ALLOWED, disable_notification=True)
 
 
@@ -310,11 +332,13 @@ def set_default(message):
     Setting default diary for chat.
     """
     if not check_if_logged(message):
+        logging.debug("No info for seting as default")
         BOT.reply_to(message, config.NO_INFO)
         return
+    logging.debug("Setting to default")
     TOKENS[str(message.chat.id)] = TOKENS[str(message.from_user.id)]
-    with open("database.json", "w") as fl_stream:
-        json.dump(TOKENS, fl_stream, ensure_ascii=False)
+    update_config()
+    logging.debug("Replying to inform, that user is now default for chat")
     BOT.reply_to(message, "Ok", disable_notification=True)
 
 
@@ -326,6 +350,7 @@ def send_hometask(message):
     today = datetime.date.today()
     start_of_week = today - datetime.timedelta(days=today.weekday())  # Monday
     keyboard = telebot.types.InlineKeyboardMarkup()
+    logging.debug("Configuring reply keyboard")
     keyboard.add(
         telebot.types.InlineKeyboardButton(
             text=(start_of_week - datetime.timedelta(days=7)).strftime("%d.%m.%y")
@@ -359,6 +384,7 @@ def send_hometask(message):
             + (start_of_week + datetime.timedelta(days=13)).strftime("%d.%m.%y"),
         )
     )  # next_button.
+    logging.debug("Answering to message with dates")
     BOT.reply_to(
         message, config.CHOOSE_DATE, reply_markup=keyboard, disable_notification=True
     )
@@ -370,12 +396,15 @@ def select_pupil(message):
     Selecting pupil.
     """
     if not check_if_logged(message):
+        logging.debug("No info for selecting pupil")
         BOT.reply_to(message, config.NO_INFO)
         return
     if TOKENS[check_if_logged(message)]["user_info"]["type"] != "Parent":
+        logging.debug("Not a parent")
         BOT.reply_to(message, config.NOT_A_PARENT)
         return
     keyboard = telebot.types.InlineKeyboardMarkup()
+    logging.debug("Configuring reply keyboard")
     for pupil in TOKENS[check_if_logged(message)]["pupils"]:
         keyboard.add(
             telebot.types.InlineKeyboardButton(
@@ -383,6 +412,7 @@ def select_pupil(message):
                 callback_data="ID: " + str(pupil["id"]),
             )
         )
+    logging.debug("Answering to message with pupils")
     BOT.reply_to(
         message, config.CHOOSE_PUPIL, reply_markup=keyboard, disable_notification=True
     )
@@ -393,7 +423,9 @@ def callback(call):
     """
     Answering for Telegram's callback.
     """
+    logging.debug("Starting processing callback %s", str(call.data))
     if call.data[:3] == "ID:":
+        logging.debug("Setting default pupil")
         pupil_id = int(call.data.split(" ")[1])
         TOKENS[check_if_logged(call.message.reply_to_message)]["current"] = pupil_id
         update_config()
@@ -402,10 +434,12 @@ def callback(call):
             if int(pupil["id"]) == pupil_id:
                 pupil_name = pupil["last_name"] + " " + pupil["first_name"]
                 break
+        logging.debug("Answering to callback to set pupil")
         BOT.answer_callback_query(
             call.id, show_alert=False, text=config.SELECTED_PUPIL.format(pupil_name)
         )
     elif len(call.data.split(" ")) == 3:
+        logging.debug("Changing week")
         start_of_week = datetime.datetime.strptime(
             str(call.data).split(" ")[0], "%d.%m.%y"
         )
@@ -446,15 +480,18 @@ def callback(call):
             )
         )  # next_button.
 
+        logging.debug("Editing previous message to change week")
         BOT.edit_message_reply_markup(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=keyboard,
         )
+        logging.debug("Answering to callback to change week")
         BOT.answer_callback_query(
             call.id, show_alert=False, text=config.WEEK_CHANGE_TEXT
         )
     else:
+        logging.debug("Getting home task")
         if check_date(call.data) != "OK":
             BOT.send_message(
                 call.message.chat.id,
@@ -467,19 +504,18 @@ def callback(call):
                 disable_notification=True,
             )
             return
-        with open("log.txt", "a") as fl_stream:
-            fl_stream.write(
-                str(call.from_user.first_name)
-                + " "
-                + str(call.from_user.last_name)
-                + " "
-                + str(call.from_user.username)
-                + " "
-                + str(call.from_user.id)
-                + " Chat id : "
-                + str(call.message.chat.id)
-                + "\n"
-            )
+        write_to_log(
+            str(call.from_user.first_name)
+            + " "
+            + str(call.from_user.last_name)
+            + " "
+            + str(call.from_user.username)
+            + " "
+            + str(call.from_user.id)
+            + " Chat id : "
+            + str(call.message.chat.id)
+        )
+        logging.debug("Sending hometask")
         BOT.send_message(
             call.message.chat.id,
             text="["
@@ -494,6 +530,7 @@ def callback(call):
             + get_ht(call.data, call.message.reply_to_message),
             disable_notification=True,
         )
+        logging.debug("Answering to callback from home task")
         if str(call.from_user.id) in config.CUSTOM_TEXT.keys():
             BOT.answer_callback_query(
                 call.id,
