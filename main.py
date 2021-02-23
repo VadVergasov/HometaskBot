@@ -102,7 +102,7 @@ def get_ht(date, message):
 
     if TOKENS[check_if_logged(message)]["user_info"]["type"] == "Parent":
         try:
-            pupil_id = TOKENS[check_if_logged(message)][ "current"]
+            pupil_id = TOKENS[check_if_logged(message)]["current"]
         except KeyError:
             return config.PUPIL_NOT_SELECTED
     else:
@@ -370,7 +370,6 @@ def select_pupil(message):
         BOT.reply_to(message, config.NOT_A_PARENT)
         return
     keyboard = telebot.types.InlineKeyboardMarkup()
-    logging.debug(TOKENS[check_if_logged(message)]["pupils"])
     for pupil in TOKENS[check_if_logged(message)]["pupils"]:
         keyboard.add(
             telebot.types.InlineKeyboardButton(
