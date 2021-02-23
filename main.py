@@ -242,17 +242,19 @@ def info(message):
         user_info = TOKENS[check_if_logged(message)]["user_info"]
 
         logging.debug("Sending info about user")
-        BOT.reply_to(
-            message,
-            config.LOGIN_INFO.format(
-                user_info["last_name"],
-                user_info["first_name"],
-                user_info["subdomain"],
-            ),
-            disable_notification=True,
+        logging.debug(
+            BOT.reply_to(
+                message,
+                config.LOGIN_INFO.format(
+                    user_info["last_name"],
+                    user_info["first_name"],
+                    user_info["subdomain"],
+                ),
+                disable_notification=True,
+            )
         )
     logging.debug("Sending help/start message")
-    BOT.reply_to(message, config.ABOUT, disable_notification=True)
+    logging.debug(BOT.reply_to(message, config.ABOUT, disable_notification=True))
 
 
 @BOT.message_handler(func=check_for_creds)
@@ -266,8 +268,8 @@ def getting_token(message):
         token = auth(*message.text.split(" "))
     except SystemError:
         logging.debug("SystemError on auth")
-        BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG)
-        BOT.delete_message(message.chat.id, message.message_id)
+        logging.debug(BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG))
+        logging.debug(BOT.delete_message(message.chat.id, message.message_id))
         return
 
     TOKENS[str(message.from_user.id)] = dict()
@@ -283,16 +285,18 @@ def getting_token(message):
         )
 
     logging.debug("Replying, that user is authenticated")
-    BOT.send_message(
-        message.chat.id,
-        config.LOGGED_IN.format(
-            TOKENS[str(message.from_user.id)]["user_info"]["last_name"],
-            TOKENS[str(message.from_user.id)]["user_info"]["first_name"],
-            TOKENS[str(message.from_user.id)]["user_info"]["subdomain"],
-        ),
+    logging.debug(
+        BOT.send_message(
+            message.chat.id,
+            config.LOGGED_IN.format(
+                TOKENS[str(message.from_user.id)]["user_info"]["last_name"],
+                TOKENS[str(message.from_user.id)]["user_info"]["first_name"],
+                TOKENS[str(message.from_user.id)]["user_info"]["subdomain"],
+            ),
+        )
     )
     logging.debug("Deleting message with credentials")
-    BOT.delete_message(message.chat.id, message.message_id)
+    logging.debug(BOT.delete_message(message.chat.id, message.message_id))
     update_config()
 
 
@@ -303,14 +307,14 @@ def get_marks(message):
     """
     if message.chat.type != "private":
         logging.debug("Not a private chat, can't get marks")
-        BOT.reply_to(message, config.GROUP_NOT_ALLOWED)
+        logging.debug(BOT.reply_to(message, config.GROUP_NOT_ALLOWED))
         return
     if not check_if_logged(message):
         logging.debug("No info to get marks")
-        BOT.reply_to(message, config.NO_INFO)
+        logging.debug(BOT.reply_to(message, config.NO_INFO))
         return
     logging.debug("Replying with marks")
-    BOT.reply_to(message, get_quarter(check_if_logged(message)))
+    logging.debug(BOT.reply_to(message, get_quarter(check_if_logged(message))))
 
 
 @BOT.message_handler(commands=["login"])
@@ -320,10 +324,14 @@ def login(message):
     """
     if message.chat.type == "private":
         logging.debug("Not a private chat, can't log in")
-        BOT.reply_to(message, config.LOGIN_TEXT, disable_notification=True)
+        logging.debug(
+            BOT.reply_to(message, config.LOGIN_TEXT, disable_notification=True)
+        )
     else:
         logging.debug("Replying to a login message")
-        BOT.reply_to(message, config.GROUP_NOT_ALLOWED, disable_notification=True)
+        logging.debug(
+            BOT.reply_to(message, config.GROUP_NOT_ALLOWED, disable_notification=True)
+        )
 
 
 @BOT.message_handler(commands=["set"])
@@ -333,13 +341,13 @@ def set_default(message):
     """
     if not check_if_logged(message):
         logging.debug("No info for seting as default")
-        BOT.reply_to(message, config.NO_INFO)
+        logging.debug(BOT.reply_to(message, config.NO_INFO))
         return
     logging.debug("Setting to default")
     TOKENS[str(message.chat.id)] = TOKENS[str(message.from_user.id)]
     update_config()
     logging.debug("Replying to inform, that user is now default for chat")
-    BOT.reply_to(message, "Ok", disable_notification=True)
+    logging.debug(BOT.reply_to(message, "Ok", disable_notification=True))
 
 
 @BOT.message_handler(commands=["hometask"])
@@ -385,8 +393,13 @@ def send_hometask(message):
         )
     )  # next_button.
     logging.debug("Answering to message with dates")
-    BOT.reply_to(
-        message, config.CHOOSE_DATE, reply_markup=keyboard, disable_notification=True
+    logging.debug(
+        BOT.reply_to(
+            message,
+            config.CHOOSE_DATE,
+            reply_markup=keyboard,
+            disable_notification=True,
+        )
     )
 
 
@@ -397,11 +410,11 @@ def select_pupil(message):
     """
     if not check_if_logged(message):
         logging.debug("No info for selecting pupil")
-        BOT.reply_to(message, config.NO_INFO)
+        logging.debug(BOT.reply_to(message, config.NO_INFO))
         return
     if TOKENS[check_if_logged(message)]["user_info"]["type"] != "Parent":
         logging.debug("Not a parent")
-        BOT.reply_to(message, config.NOT_A_PARENT)
+        logging.debug(BOT.reply_to(message, config.NOT_A_PARENT))
         return
     keyboard = telebot.types.InlineKeyboardMarkup()
     logging.debug("Configuring reply keyboard")
@@ -413,8 +426,13 @@ def select_pupil(message):
             )
         )
     logging.debug("Answering to message with pupils")
-    BOT.reply_to(
-        message, config.CHOOSE_PUPIL, reply_markup=keyboard, disable_notification=True
+    logging.debug(
+        BOT.reply_to(
+            message,
+            config.CHOOSE_PUPIL,
+            reply_markup=keyboard,
+            disable_notification=True,
+        )
     )
 
 
@@ -435,8 +453,10 @@ def callback(call):
                 pupil_name = pupil["last_name"] + " " + pupil["first_name"]
                 break
         logging.debug("Answering to callback to set pupil")
-        BOT.answer_callback_query(
-            call.id, show_alert=False, text=config.SELECTED_PUPIL.format(pupil_name)
+        logging.debug(
+            BOT.answer_callback_query(
+                call.id, show_alert=False, text=config.SELECTED_PUPIL.format(pupil_name)
+            )
         )
     elif len(call.data.split(" ")) == 3:
         logging.debug("Changing week")
@@ -481,27 +501,33 @@ def callback(call):
         )  # next_button.
 
         logging.debug("Editing previous message to change week")
-        BOT.edit_message_reply_markup(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=keyboard,
+        logging.debug(
+            BOT.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                reply_markup=keyboard,
+            )
         )
         logging.debug("Answering to callback to change week")
-        BOT.answer_callback_query(
-            call.id, show_alert=False, text=config.WEEK_CHANGE_TEXT
+        logging.debug(
+            BOT.answer_callback_query(
+                call.id, show_alert=False, text=config.WEEK_CHANGE_TEXT
+            )
         )
     else:
         logging.debug("Getting home task")
         if check_date(call.data) != "OK":
-            BOT.send_message(
-                call.message.chat.id,
-                "["
-                + str(call.from_user.first_name)
-                + "](tg://user?id="
-                + str(call.from_user.id)
-                + "), "
-                + check_date(call.data),
-                disable_notification=True,
+            logging.debug(
+                BOT.send_message(
+                    call.message.chat.id,
+                    "["
+                    + str(call.from_user.first_name)
+                    + "](tg://user?id="
+                    + str(call.from_user.id)
+                    + "), "
+                    + check_date(call.data),
+                    disable_notification=True,
+                )
             )
             return
         write_to_log(
@@ -516,32 +542,39 @@ def callback(call):
             + str(call.message.chat.id)
         )
         logging.debug("Sending hometask")
-        BOT.send_message(
-            call.message.chat.id,
-            text="["
-            + str(call.from_user.first_name)
-            + "](tg://user?id="
-            + str(call.from_user.id)
-            + "), "
-            + str(config.HOMETASK_ON)
-            + " "
-            + str(call.data)
-            + ":\n"
-            + get_ht(call.data, call.message.reply_to_message),
-            disable_notification=True,
+        logging.debug(
+            BOT.send_message(
+                call.message.chat.id,
+                text="["
+                + str(call.from_user.first_name)
+                + "](tg://user?id="
+                + str(call.from_user.id)
+                + "), "
+                + str(config.HOMETASK_ON)
+                + " "
+                + str(call.data)
+                + ":\n"
+                + get_ht(call.data, call.message.reply_to_message),
+                disable_notification=True,
+            )
         )
         logging.debug("Answering to callback from home task")
         if str(call.from_user.id) in config.CUSTOM_TEXT.keys():
-            BOT.answer_callback_query(
-                call.id,
-                show_alert=False,
-                text=config.ANSWER_TEXT + config.CUSTOM_TEXT[str(call.from_user.id)],
+            logging.debug(
+                BOT.answer_callback_query(
+                    call.id,
+                    show_alert=False,
+                    text=config.ANSWER_TEXT
+                    + config.CUSTOM_TEXT[str(call.from_user.id)],
+                )
             )
         else:
-            BOT.answer_callback_query(
-                call.id,
-                show_alert=False,
-                text=config.ANSWER_TEXT,
+            logging.debug(
+                BOT.answer_callback_query(
+                    call.id,
+                    show_alert=False,
+                    text=config.ANSWER_TEXT,
+                )
             )
 
 
