@@ -169,7 +169,13 @@ def get_quarter(key):
         days=datetime.date.today().weekday()
     )
 
-    pupil_id = TOKENS[key]["user_info"]["id"]
+    if TOKENS[key]["user_info"]["type"] == "Parent":
+        try:
+            pupil_id = TOKENS[key]["current"]
+        except KeyError:
+            return config.PUPIL_NOT_SELECTED
+    else:
+        pupil_id = TOKENS[key]["user_info"]["id"]
 
     marks = dict()
 
