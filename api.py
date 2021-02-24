@@ -26,6 +26,12 @@ def auth(username, password, session):
         "https://schools.by/api/auth",
         data={"username": username, "password": password},
     )
+    if (
+        request.status_code == 400
+        and request.json()["details"]
+        == "Невозможно войти с предоставленными учетными данными."
+    ):
+        raise KeyError
     if request.status_code != 200:
         logging.error(str(request.text))
         raise SystemError("Can't access API")

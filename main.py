@@ -280,6 +280,11 @@ def getting_token(message):
         logging.debug(BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG))
         logging.debug(BOT.delete_message(message.chat.id, message.message_id))
         return
+    except KeyError:
+        logging.debug("Incorrect credentials")
+        logging.debug(BOT.send_message(message.chat.id, config.INCORRECT_CREDENTIALS))
+        logging.debug(BOT.delete_message(message.chat.id, message.message_id))
+        return
 
     TOKENS[str(message.from_user.id)] = dict()
     TOKENS[str(message.from_user.id)]["token"] = token
@@ -332,12 +337,12 @@ def login(message):
     Replying to /login command.
     """
     if message.chat.type == "private":
-        logging.debug("Not a private chat, can't log in")
+        logging.debug("Replying to a login message")
         logging.debug(
             BOT.reply_to(message, config.LOGIN_TEXT, disable_notification=True)
         )
     else:
-        logging.debug("Replying to a login message")
+        logging.debug("Not a private chat, can't log in")
         logging.debug(
             BOT.reply_to(message, config.GROUP_NOT_ALLOWED, disable_notification=True)
         )
