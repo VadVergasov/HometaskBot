@@ -271,12 +271,14 @@ def getting_token(message):
     Authenticating user.
     """
     token = None
-    logging.debug("Trying to auth user")
+    logging.debug("Deleting message with credentials")
     logging.debug(BOT.delete_message(message.chat.id, message.message_id))
+    logging.debug("Sending message, that will be edited")
     message_from_bot = BOT.send_message(message.chat.id, config.TRYING_TO_AUTH)
     logging.debug(message_from_bot)
     session = requests.Session()
     try:
+        logging.debug("Trying to auth user")
         token = auth(*message.text.split(" "), session)
     except SystemError:
         logging.debug("SystemError on auth")
@@ -323,7 +325,6 @@ def getting_token(message):
             ),
         )
     )
-    logging.debug("Deleting message with credentials")
     update_config()
 
 
