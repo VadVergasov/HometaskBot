@@ -274,7 +274,7 @@ def getting_token(message):
     logging.debug("Deleting message with credentials")
     logging.debug(BOT.delete_message(message.chat.id, message.message_id))
     logging.debug("Sending message, that will be edited")
-    message_from_bot = BOT.send_message(message.chat.id, config.TRYING_TO_AUTH)
+    message_from_bot = BOT.send_message(message.chat.id, config.PLEASE_WAIT)
     logging.debug(message_from_bot)
     session = requests.Session()
     try:
@@ -342,7 +342,15 @@ def get_marks(message):
         logging.debug(BOT.reply_to(message, config.NO_INFO))
         return
     logging.debug("Replying with marks")
-    logging.debug(BOT.reply_to(message, get_quarter(check_if_logged(message))))
+    bots_message = BOT.reply_to(message, config.PLEASE_WAIT)
+    logging.debug(bots_message)
+    logging.debug(
+        BOT.edit_message_text(
+            chat_id=bots_message.chat.id,
+            message_id=bots_message.message_id,
+            text=get_quarter(check_if_logged(message)),
+        )
+    )
 
 
 @BOT.message_handler(commands=["login"])

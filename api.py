@@ -59,7 +59,7 @@ def get_pupils(token, parent_id, session):
     """
     headers = {"Authorization": "Token " + token + " "}
     request = session.get(
-        "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils/",
+        "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils",
         headers=headers,
     )
     if request.status_code != 200:
