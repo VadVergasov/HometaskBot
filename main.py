@@ -272,18 +272,31 @@ def getting_token(message):
     """
     token = None
     logging.debug("Trying to auth user")
+    logging.debug(BOT.delete_message(message.chat.id, message.message_id))
+    message_from_bot = BOT.send_message(message.chat.id, config.TRYING_TO_AUTH)
+    logging.debug(message_from_bot)
     session = requests.Session()
     try:
         token = auth(*message.text.split(" "), session)
     except SystemError:
         logging.debug("SystemError on auth")
-        logging.debug(BOT.send_message(message.chat.id, config.SOMETHING_WENT_WRONG))
-        logging.debug(BOT.delete_message(message.chat.id, message.message_id))
+        logging.debug(
+            BOT.edit_message_text(
+                chat_id=message_from_bot.chat.id,
+                message_id=message_from_bot.message_id,
+                text=config.SOMETHING_WENT_WRONG,
+            )
+        )
         return
     except KeyError:
         logging.debug("Incorrect credentials")
-        logging.debug(BOT.send_message(message.chat.id, config.INCORRECT_CREDENTIALS))
-        logging.debug(BOT.delete_message(message.chat.id, message.message_id))
+        logging.debug(
+            BOT.edit_message_text(
+                chat_id=message_from_bot.chat.id,
+                message_id=message_from_bot.message_id,
+                text=config.INCORRECT_CREDENTIALS,
+            )
+        )
         return
 
     TOKENS[str(message.from_user.id)] = dict()
@@ -300,9 +313,10 @@ def getting_token(message):
 
     logging.debug("Replying, that user is authenticated")
     logging.debug(
-        BOT.send_message(
-            message.chat.id,
-            config.LOGGED_IN.format(
+        BOT.edit_message_text(
+            chat_id=message_from_bot.chat.id,
+            message_id=message_from_bot.message_id,
+            text=config.LOGGED_IN.format(
                 TOKENS[str(message.from_user.id)]["user_info"]["last_name"],
                 TOKENS[str(message.from_user.id)]["user_info"]["first_name"],
                 TOKENS[str(message.from_user.id)]["user_info"]["subdomain"],
@@ -310,7 +324,6 @@ def getting_token(message):
         )
     )
     logging.debug("Deleting message with credentials")
-    logging.debug(BOT.delete_message(message.chat.id, message.message_id))
     update_config()
 
 
