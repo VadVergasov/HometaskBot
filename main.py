@@ -629,9 +629,9 @@ BOT.set_webhook(
     certificate=open(config.WEBHOOK_SSL_CERT, "r"),
 )
 
-app.run(
-    host=config.WEBHOOK_LISTEN,
-    port=config.LISTEN_PORT,
-    ssl_context=(config.WEBHOOK_SSL_CERT, config.WEBHOOK_SSL_PRIV),
-    debug=False,
-)
+if __name__ == "__main__":
+    app.run(
+        host=config.WEBHOOK_LISTEN,
+        port=config.LISTEN_PORT,
+        debug=False,
+    )

@@ -1,0 +1,12 @@
+[Unit]
+Description=str
+After=network.target
+
+[Service]
+User=username
+WorkingDirectory=path
+Environment="PATH=path_to_env"
+ExecStart=path_to_gunicorn -b 127.0.0.1:12346 main:app
+
+[Install]
+WantedBy=multi-user.target

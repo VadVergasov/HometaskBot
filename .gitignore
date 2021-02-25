@@ -2,8 +2,7 @@ config.py
 .vscode/
 __pycache__/
 hometasker_env/
-log.txt
-logging.log
+*.txt
+*.log
 database.json
-cert.pem
-pkey.pem
+*.pem
