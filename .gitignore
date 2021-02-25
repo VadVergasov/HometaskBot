@@ -6,3 +6,4 @@ hometasker_env/
 *.log
 database.json
 *.pem
+*.service
