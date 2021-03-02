@@ -59,6 +59,9 @@ def webhook():
 
 
 def update_config():
+    """
+    Updates local config, to cache some data.
+    """
     with open("database.json", "w") as fl_stream:
         ujson.dump(TOKENS, fl_stream, ensure_ascii=False)
 
@@ -119,9 +122,9 @@ def get_ht(date, message):
         TOKENS[check_if_logged(message)]["token"], date, pupil_id, session
     )
 
+    string = ""
     try:
         logging.debug("Forming answer with home task")
-        string = ""
         for row in hometask["lessons"].keys():
             string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
             if hometask["lessons"][row]["lesson_data"]["hometask"] is None:
@@ -160,7 +163,7 @@ def get_ht(date, message):
         return config.NOT_VALID
 
 
-def check_for_creds(message):
+def check_for_credentials(message):
     """
     Check if message is answer to login request message.
     """
@@ -265,7 +268,7 @@ def info(message):
     logging.debug(BOT.reply_to(message, config.ABOUT, disable_notification=True))
 
 
-@BOT.message_handler(func=check_for_creds)
+@BOT.message_handler(func=check_for_credentials)
 def getting_token(message):
     """
     Authenticating user.
