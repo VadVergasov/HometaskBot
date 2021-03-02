@@ -1,4 +1,7 @@
 HometaskBot
+[![License](https://img.shields.io/github/license/VadVergasov/HometaskBot)](https://github.com/VadVergasov/HometaskBot/blob/master/LICENSE)
+[![Stars](https://img.shields.io/github/stars/VadVergasov/HometaskBot)](https://github.com/VadVergasov/HometaskBot/stargazers)
+![Codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)
 ===========
 
 Simple to use Telegram bot, that can send hometask from schools.by, belorussian e-diary platform.
