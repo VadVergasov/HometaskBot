@@ -17,14 +17,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import collections
 import datetime
-import json
 import logging
 import os
 import time
 
 import flask
-import telebot
 import requests
+import telebot
+import ujson
 
 import config
 from api import auth, get_hometask, get_info, get_pupils, get_week
@@ -35,7 +35,7 @@ if not os.path.isfile("database.json"):
     with open("database.json", "w") as f:
         f.write("{}")
 with open("database.json", "r", encoding="utf-8") as f:
-    TOKENS = json.load(f)
+    TOKENS = ujson.load(f)
 
 WEBHOOK_URL_BASE = "https://%s:%s" % (config.WEBHOOK_HOST, config.WEBHOOK_PORT)
 WEBHOOK_URL_PATH = "/%s/" % (config.TG_TOKEN)
@@ -60,7 +60,7 @@ def webhook():
 
 def update_config():
     with open("database.json", "w") as fl_stream:
-        json.dump(TOKENS, fl_stream, ensure_ascii=False)
+        ujson.dump(TOKENS, fl_stream, ensure_ascii=False)
 
 
 def check_if_logged(message):
