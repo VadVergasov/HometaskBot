@@ -25,6 +25,7 @@ import flask
 import requests
 import telebot
 import ujson
+from urllib3.exceptions import ProtocolError
 
 import config
 from api import auth, get_hometask, get_info, get_pupils, get_week
@@ -59,9 +60,6 @@ def webhook():
 
 
 def update_config():
-    """
-    Updates local config, to cache some data.
-    """
     with open("database.json", "w") as fl_stream:
         ujson.dump(TOKENS, fl_stream, ensure_ascii=False)
 
@@ -118,13 +116,16 @@ def get_ht(date, message):
 
     session = requests.Session()
 
-    hometask = get_hometask(
-        TOKENS[check_if_logged(message)]["token"], date, pupil_id, session
-    )
+    try:
+        hometask = get_hometask(
+            TOKENS[check_if_logged(message)]["token"], date, pupil_id, session
+        )
+    except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+        return config.SOMETHING_WENT_WRONG
 
-    string = ""
     try:
         logging.debug("Forming answer with home task")
+        string = ""
         for row in hometask["lessons"].keys():
             string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
             if hometask["lessons"][row]["lesson_data"]["hometask"] is None:
@@ -163,7 +164,7 @@ def get_ht(date, message):
         return config.NOT_VALID
 
 
-def check_for_credentials(message):
+def check_for_creds(message):
     """
     Check if message is answer to login request message.
     """
@@ -201,8 +202,11 @@ def get_quarter(key):
 
     logging.debug("Looking for a start of quarter")
     while "holidays" not in week.keys():
-        week = get_week(TOKENS[key]["token"], date, pupil_id, session)
-        date -= datetime.timedelta(days=7)
+        try:
+            week = get_week(TOKENS[key]["token"], date, pupil_id, session)
+            date -= datetime.timedelta(days=7)
+        except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+            return config.SOMETHING_WENT_WRONG
 
     date += datetime.timedelta(days=14)
 
@@ -210,7 +214,10 @@ def get_quarter(key):
 
     logging.debug("Looking for an end of quarter")
     while "holidays" not in week.keys():
-        week = get_week(TOKENS[key]["token"], date, pupil_id, session)
+        try:
+            week = get_week(TOKENS[key]["token"], date, pupil_id, session)
+        except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+            return config.SOMETHING_WENT_WRONG
 
         if "holidays" in week.keys():
             break
@@ -268,7 +275,7 @@ def info(message):
     logging.debug(BOT.reply_to(message, config.ABOUT, disable_notification=True))
 
 
-@BOT.message_handler(func=check_for_credentials)
+@BOT.message_handler(func=check_for_creds)
 def getting_token(message):
     """
     Authenticating user.
@@ -283,7 +290,7 @@ def getting_token(message):
     try:
         logging.debug("Trying to auth user")
         token = auth(*message.text.split(" "), session)
-    except SystemError:
+    except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
         logging.debug("SystemError on auth")
         logging.debug(
             BOT.edit_message_text(
@@ -307,14 +314,36 @@ def getting_token(message):
     TOKENS[str(message.from_user.id)] = dict()
     TOKENS[str(message.from_user.id)]["token"] = token
 
-    TOKENS[str(message.from_user.id)]["user_info"] = get_info(
-        TOKENS[str(message.from_user.id)]["token"], session
-    )
+    try:
+        TOKENS[str(message.from_user.id)]["user_info"] = get_info(
+            TOKENS[str(message.from_user.id)]["token"], session
+        )
+    except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+        logging.debug("SystemError on auth")
+        logging.debug(
+            BOT.edit_message_text(
+                chat_id=message_from_bot.chat.id,
+                message_id=message_from_bot.message_id,
+                text=config.SOMETHING_WENT_WRONG,
+            )
+        )
+        return
 
     if TOKENS[str(message.from_user.id)]["user_info"]["type"] == "Parent":
-        TOKENS[str(message.from_user.id)]["pupils"] = get_pupils(
-            token, TOKENS[str(message.from_user.id)]["user_info"]["id"], session
-        )
+        try:
+            TOKENS[str(message.from_user.id)]["pupils"] = get_pupils(
+                token, TOKENS[str(message.from_user.id)]["user_info"]["id"], session
+            )
+        except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+            logging.debug("SystemError on auth")
+            logging.debug(
+                BOT.edit_message_text(
+                    chat_id=message_from_bot.chat.id,
+                    message_id=message_from_bot.message_id,
+                    text=config.SOMETHING_WENT_WRONG,
+                )
+            )
+            return
 
     logging.debug("Replying, that user is authenticated")
     logging.debug(

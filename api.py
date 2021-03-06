@@ -17,26 +17,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import logging
 
-from urllib3.exceptions import ProtocolError
-
 
 def auth(username, password, session):
     """
     Authinticating and getting token.
     """
-    try:
-        request = session.post(
-            "https://schools.by/api/auth",
-            data={"username": username, "password": password},
-            timeout=3,
-        )
-    except (ConnectionResetError, ConnectionError, ProtocolError):
-        logging.debug("ConnectionReset, retrying")
-        request = session.post(
-            "https://schools.by/api/auth",
-            data={"username": username, "password": password},
-            timeout=3,
-        )
+    request = session.post(
+        "https://schools.by/api/auth",
+        data={"username": username, "password": password},
+        timeout=3,
+    )
     if (
         request.status_code == 400
         and request.json()["details"]
@@ -55,19 +45,11 @@ def get_info(token, session):
     Get user info from schools.by
     """
     headers = {"Authorization": "Token " + token + " "}
-    try:
-        request = session.get(
-            "https://schools.by/subdomain-api/user/current",
-            headers=headers,
-            timeout=3,
-        )
-    except (ConnectionResetError, ConnectionError, ProtocolError):
-        logging.debug("ConnectionReset, retrying")
-        request = session.get(
-            "https://schools.by/subdomain-api/user/current",
-            headers=headers,
-            timeout=3,
-        )
+    request = session.get(
+        "https://schools.by/subdomain-api/user/current",
+        headers=headers,
+        timeout=3,
+    )
     if request.status_code != 200:
         logging.error(str(request.text))
         raise SystemError("Can't access API")
@@ -79,19 +61,11 @@ def get_pupils(token, parent_id, session):
     Get all pupil_ids by parent_id
     """
     headers = {"Authorization": "Token " + token + " "}
-    try:
-        request = session.get(
-            "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils",
-            headers=headers,
-            timeout=3,
-        )
-    except (ConnectionResetError, ConnectionError, ProtocolError):
-        logging.debug("ConnectionReset, retrying")
-        request = session.get(
-            "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils",
-            headers=headers,
-            timeout=3,
-        )
+    request = session.get(
+        "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils",
+        headers=headers,
+        timeout=3,
+    )
     if request.status_code != 200:
         logging.error(str(request.text))
         raise SystemError("Can't access API")
@@ -108,25 +82,14 @@ def get_hometask(token, date, pupil_id, session):
         date.split(".")[0],
     )
     headers = {"Authorization": "Token " + token + " "}
-    try:
-        request = session.get(
-            "https://schools.by/subdomain-api/pupil/"
-            + str(pupil_id)
-            + "/daybook/day/"
-            + str(year + "-" + month + "-" + day),
-            headers=headers,
-            timeout=3,
-        )
-    except (ConnectionResetError, ConnectionError, ProtocolError):
-        logging.debug("ConnectionReset, retrying")
-        request = session.get(
-            "https://schools.by/subdomain-api/pupil/"
-            + str(pupil_id)
-            + "/daybook/day/"
-            + str(year + "-" + month + "-" + day),
-            headers=headers,
-            timeout=3,
-        )
+    request = session.get(
+        "https://schools.by/subdomain-api/pupil/"
+        + str(pupil_id)
+        + "/daybook/day/"
+        + str(year + "-" + month + "-" + day),
+        headers=headers,
+        timeout=3,
+    )
     if request.status_code != 200:
         logging.error(str(request.text))
         raise SystemError("Can't access API")
@@ -138,25 +101,14 @@ def get_week(token, date, pupil_id, session):
     Get hometask on week.
     """
     headers = {"Authorization": "Token " + token + " "}
-    try:
-        request = session.get(
-            "https://schools.by/subdomain-api/pupil/"
-            + str(pupil_id)
-            + "/daybook/week/"
-            + date.strftime("%Y-%m-%d"),
-            headers=headers,
-            timeout=3,
-        )
-    except (ConnectionResetError, ConnectionError, ProtocolError):
-        logging.debug("ConnectionReset, retrying")
-        request = session.get(
-            "https://schools.by/subdomain-api/pupil/"
-            + str(pupil_id)
-            + "/daybook/week/"
-            + date.strftime("%Y-%m-%d"),
-            headers=headers,
-            timeout=3,
-        )
+    request = session.get(
+        "https://schools.by/subdomain-api/pupil/"
+        + str(pupil_id)
+        + "/daybook/week/"
+        + date.strftime("%Y-%m-%d"),
+        headers=headers,
+        timeout=3,
+    )
     if request.status_code != 200:
         logging.error(str(request.text))
         raise SystemError("Can't access API")
