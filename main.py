@@ -60,6 +60,9 @@ def webhook():
 
 
 def update_config():
+    """
+    Updates local config, to cache some data.
+    """
     with open("database.json", "w") as fl_stream:
         ujson.dump(TOKENS, fl_stream, ensure_ascii=False)
 
@@ -164,7 +167,7 @@ def get_ht(date, message):
         return config.NOT_VALID
 
 
-def check_for_creds(message):
+def check_for_credentials(message):
     """
     Check if message is answer to login request message.
     """
@@ -275,7 +278,7 @@ def info(message):
     logging.debug(BOT.reply_to(message, config.ABOUT, disable_notification=True))
 
 
-@BOT.message_handler(func=check_for_creds)
+@BOT.message_handler(func=check_for_credentials)
 def getting_token(message):
     """
     Authenticating user.
