@@ -133,6 +133,7 @@ def get_ht(date, message):
             TOKENS[check_if_logged(message)]["token"], date, pupil_id, session
         )
     except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+        logging.error("Error on get_hometask request to schools.by")
         return config.SOMETHING_WENT_WRONG
 
     try:
@@ -218,6 +219,7 @@ def get_quarter(key):
             week = get_week(TOKENS[key]["token"], date, pupil_id, session)
             date -= datetime.timedelta(days=7)
         except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+            logging.error("Error on get_week request to schools.by")
             return config.SOMETHING_WENT_WRONG
 
     date += datetime.timedelta(days=14)
@@ -229,6 +231,7 @@ def get_quarter(key):
         try:
             week = get_week(TOKENS[key]["token"], date, pupil_id, session)
         except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
+            logging.error("Error on get_week request to schools.by")
             return config.SOMETHING_WENT_WRONG
 
         if "holidays" in week.keys():
@@ -303,7 +306,7 @@ def getting_token(message):
         logging.debug("Trying to auth user")
         token = auth(*message.text.split(" "), session)
     except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
-        logging.debug("SystemError on auth")
+        logging.error("Error on auth request to schools.by")
         logging.debug(
             BOT.edit_message_text(
                 chat_id=message_from_bot.chat.id,
@@ -331,7 +334,7 @@ def getting_token(message):
             TOKENS[str(message.from_user.id)]["token"], session
         )
     except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
-        logging.debug("SystemError on auth")
+        logging.error("Error on get_info request to schools.by")
         logging.debug(
             BOT.edit_message_text(
                 chat_id=message_from_bot.chat.id,
@@ -347,7 +350,7 @@ def getting_token(message):
                 token, TOKENS[str(message.from_user.id)]["user_info"]["id"], session
             )
         except (SystemError, ConnectionError, ConnectionResetError, ProtocolError):
-            logging.debug("SystemError on auth")
+            logging.error("Error on get_pupils request to schools.by")
             logging.debug(
                 BOT.edit_message_text(
                     chat_id=message_from_bot.chat.id,
