@@ -59,6 +59,15 @@ def webhook():
     flask.abort(403)
 
 
+@app.errorhandler(Exception)
+def handle_exception(error):
+    """
+    Logging all unhandled exceptions.
+    """
+    logging.error(str(error))
+    return "Error", 500
+
+
 def update_config():
     """
     Updates local config, to cache some data.
