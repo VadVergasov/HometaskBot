@@ -68,6 +68,13 @@ def handle_exception(error):
     return "Error", 500
 
 
+def get_str_of_day(date, delta):
+    """
+    Generating string for date with some delta in format dd.mm.yy.
+    """
+    return (date + datetime.timedelta(days=delta)).strftime("%d.%m.%y")
+
+
 def update_config():
     """
     Updates local config, to cache some data.
@@ -549,37 +556,29 @@ def callback(call):
         keyboard = telebot.types.InlineKeyboardMarkup()
         keyboard.add(
             telebot.types.InlineKeyboardButton(
-                text=(start_of_week - datetime.timedelta(days=7)).strftime("%d.%m.%y")
+                text=get_str_of_day(start_of_week, -7)
                 + " - "
-                + (start_of_week - datetime.timedelta(days=1)).strftime("%d.%m.%y"),
-                callback_data=(start_of_week - datetime.timedelta(days=7)).strftime(
-                    "%d.%m.%y"
-                )
+                + get_str_of_day(start_of_week, -1),
+                callback_data=get_str_of_day(start_of_week, -7)
                 + " - "
-                + (start_of_week - datetime.timedelta(days=1)).strftime("%d.%m.%y"),
+                + get_str_of_day(start_of_week, -1),
             )
         )  # previous button.
-        for i in range(5):
+        for number in range(5):
             keyboard.add(
                 telebot.types.InlineKeyboardButton(
-                    text=(start_of_week + datetime.timedelta(days=i)).strftime(
-                        "%d.%m.%y"
-                    ),
-                    callback_data=(start_of_week + datetime.timedelta(days=i)).strftime(
-                        "%d.%m.%y"
-                    ),
+                    text=get_str_of_day(start_of_week, number),
+                    callback_data=get_str_of_day(start_of_week, number),
                 )
             )
         keyboard.add(
             telebot.types.InlineKeyboardButton(
-                text=(start_of_week + datetime.timedelta(days=7)).strftime("%d.%m.%y")
+                text=get_str_of_day(start_of_week, 7)
                 + " - "
-                + (start_of_week + datetime.timedelta(days=13)).strftime("%d.%m.%y"),
-                callback_data=(start_of_week + datetime.timedelta(days=7)).strftime(
-                    "%d.%m.%y"
-                )
+                + get_str_of_day(start_of_week, 13),
+                callback_data=get_str_of_day(start_of_week, 7)
                 + " - "
-                + (start_of_week + datetime.timedelta(days=13)).strftime("%d.%m.%y"),
+                + get_str_of_day(start_of_week, 13),
             )
         )  # next_button.
 
