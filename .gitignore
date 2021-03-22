@@ -8,3 +8,7 @@
 !/*.md
 !/requirements.txt
 !/LICENSE
+
+!/.github/
+!/.github/workflows/
+!/.github/workflows/dependabot.yml
