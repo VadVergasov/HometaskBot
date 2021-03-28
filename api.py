@@ -40,13 +40,13 @@ def auth(username, password, session):
     return token
 
 
-def get_info(token, session):
+def _get_request(token, request, session):
     """
-    Get user info from schools.by
+    Forming and sending request.
     """
     headers = {"Authorization": "Token " + token + " "}
     request = session.get(
-        "https://schools.by/subdomain-api/user/current",
+        request,
         headers=headers,
         timeout=3,
     )
@@ -54,22 +54,24 @@ def get_info(token, session):
         logging.error(str(request.text))
         raise SystemError("Can't access API")
     return request.json()
+
+
+def get_info(token, session):
+    """
+    Get user info from schools.by
+    """
+    return _get_request(token, "https://schools.by/subdomain-api/user/current", session)
 
 
 def get_pupils(token, parent_id, session):
     """
     Get all pupil_ids by parent_id
     """
-    headers = {"Authorization": "Token " + token + " "}
-    request = session.get(
+    return _get_request(
+        token,
         "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils",
-        headers=headers,
-        timeout=3,
+        session,
     )
-    if request.status_code != 200:
-        logging.error(str(request.text))
-        raise SystemError("Can't access API")
-    return request.json()
 
 
 def get_hometask(token, date, pupil_id, session):
@@ -81,35 +83,38 @@ def get_hometask(token, date, pupil_id, session):
         date.split(".")[1],
         date.split(".")[0],
     )
-    headers = {"Authorization": "Token " + token + " "}
-    request = session.get(
+    return _get_request(
+        token,
         "https://schools.by/subdomain-api/pupil/"
         + str(pupil_id)
         + "/daybook/day/"
         + str(year + "-" + month + "-" + day),
-        headers=headers,
-        timeout=3,
+        session,
     )
-    if request.status_code != 200:
-        logging.error(str(request.text))
-        raise SystemError("Can't access API")
-    return request.json()
 
 
 def get_week(token, date, pupil_id, session):
     """
     Get hometask on week.
     """
-    headers = {"Authorization": "Token " + token + " "}
-    request = session.get(
+    return _get_request(
+        token,
         "https://schools.by/subdomain-api/pupil/"
         + str(pupil_id)
         + "/daybook/week/"
         + date.strftime("%Y-%m-%d"),
-        headers=headers,
-        timeout=3,
+        session,
     )
-    if request.status_code != 200:
-        logging.error(str(request.text))
-        raise SystemError("Can't access API")
-    return request.json()
+
+
+def get_lastpage(token, pupil_id, session):
+    """
+    Get last daybook page.
+    """
+    return _get_request(
+        token,
+        "https://schools.by/subdomain-api/pupil/"
+        + str(pupil_id)
+        + "/daybook/last-page",
+        session,
+    )

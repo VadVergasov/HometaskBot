@@ -24,6 +24,7 @@ COMMANDS = {
     "login": "{str}",
     "marks": {str},
     "select": "{str}",
+    "lastpage": "{str}",
 }
 LOGIN_TEXT = "{str}"
 RETRY_LATER = "{str}"

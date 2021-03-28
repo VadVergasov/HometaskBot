@@ -28,7 +28,7 @@ import ujson
 from urllib3.exceptions import ProtocolError
 
 import config
-from api import auth, get_hometask, get_info, get_pupils, get_week
+from api import auth, get_hometask, get_info, get_lastpage, get_pupils, get_week
 
 logging.basicConfig(filename="logging.log", level=logging.DEBUG)
 
@@ -273,6 +273,45 @@ def get_quarter(key):
     return answer
 
 
+def lastpage(key):
+    """
+    Getting last page.
+    """
+    logging.debug("Trying to get pupil_id for last page")
+    if TOKENS[key]["user_info"]["type"] == "Parent":
+        try:
+            pupil_id = TOKENS[key]["current"]
+        except KeyError:
+            return config.PUPIL_NOT_SELECTED
+    else:
+        pupil_id = TOKENS[key]["user_info"]["id"]
+
+    session = requests.Session()
+
+    response = get_lastpage(TOKENS[key]["token"], pupil_id, session)
+
+    marks = dict()
+
+    for row in response["rows"]:
+        marks[row["class_subject"]["subject"]] = list()
+        for number in row["quarter_marks"]:
+            if row["quarter_marks"][number] is None:
+                continue
+            marks[row["class_subject"]["subject"]].append(row["quarter_marks"][number])
+
+    marks = collections.OrderedDict(sorted(marks.items()))
+
+    logging.debug("Forming answer with last page")
+    answer = ""
+    for lesson in marks.keys():
+        answer += "`" + str(lesson) + ": "
+        for mark in marks[lesson]:
+            answer += mark + " "
+        answer = answer[:-1]
+        answer += "\n`"
+    return answer
+
+
 @BOT.message_handler(commands=["start", "help"])
 def info(message):
     """
@@ -403,6 +442,31 @@ def get_marks(message):
             chat_id=bots_message.chat.id,
             message_id=bots_message.message_id,
             text=get_quarter(check_if_logged(message)),
+        )
+    )
+
+
+@BOT.message_handler(commands=["lastpage"])
+def last(message):
+    """
+    Replying to /lastpage command.
+    """
+    if message.chat.type != "private":
+        logging.debug("Not a private chat, can't get last page")
+        logging.debug(BOT.reply_to(message, config.GROUP_NOT_ALLOWED))
+        return
+    if not check_if_logged(message):
+        logging.debug("No info to get last page")
+        logging.debug(BOT.reply_to(message, config.NO_INFO))
+        return
+    logging.debug("Replying with last page")
+    bots_message = BOT.reply_to(message, config.PLEASE_WAIT)
+    logging.debug(bots_message)
+    logging.debug(
+        BOT.edit_message_text(
+            chat_id=bots_message.chat.id,
+            message_id=bots_message.message_id,
+            text=lastpage(check_if_logged(message)),
         )
     )
 

@@ -24,6 +24,7 @@ COMMANDS = {
     "login": "Log in to the platform",
     "marks": "Get marks in quarter",
     "select": "Select pupil",
+    "lastpage": "Grades for a quarter",
 }
 LOGIN_TEXT = "Reply to this message with your's username and password according to format (username password)"
 RETRY_LATER = "Retry later."
