@@ -296,6 +296,7 @@ def lastpage(key):
         marks[row["class_subject"]["subject"]] = list()
         for number in row["quarter_marks"]:
             if row["quarter_marks"][number] is None:
+                marks[row["class_subject"]["subject"]].append("-")
                 continue
             marks[row["class_subject"]["subject"]].append(row["quarter_marks"][number])
 
