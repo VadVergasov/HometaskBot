@@ -148,7 +148,13 @@ def get_ht(date, message):
         string = ""
         for row in hometask["lessons"].keys():
             string += "`" + row + ". " + hometask["lessons"][row]["subject"] + ": "
-            if hometask["lessons"][row]["lesson_data"]["hometask"] is None:
+            if hometask["lessons"][row]["lesson_data"]["hometask"] is None or (
+                isinstance(
+                    hometask["lessons"][row]["lesson_data"]["hometask"]["text"],
+                    str,
+                )
+                and hometask["lessons"][row]["lesson_data"]["hometask"]["text"] == ""
+            ):
                 string += "Ничего\n`"
             else:
                 string += hometask["lessons"][row]["lesson_data"]["hometask"]["text"]
