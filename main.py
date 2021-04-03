@@ -157,7 +157,16 @@ def get_ht(date, message):
                     or not "theme.text"
                     in hometask["lessons"][row]["lesson_data"]["not_transferred"]
                 ):
-                    if hometask["lessons"][row]["lesson_data"]["theme"] is not None:
+                    if hometask["lessons"][row]["lesson_data"][
+                        "theme"
+                    ] is not None and (
+                        isinstance(
+                            hometask["lessons"][row]["lesson_data"]["theme"]["text"],
+                            str,
+                        )
+                        and hometask["lessons"][row]["lesson_data"]["theme"]["text"]
+                        != ""
+                    ):
                         string += (
                             " Тема: "
                             + hometask["lessons"][row]["lesson_data"]["theme"]["text"]
