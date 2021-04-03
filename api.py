@@ -22,11 +22,17 @@ def auth(username, password, session):
     """
     Authinticating and getting token.
     """
-    request = session.post(
-        "https://schools.by/api/auth",
-        data={"username": username, "password": password},
-        timeout=3,
-    )
+    retry = True
+    while retry:
+        try:
+            request = session.post(
+                "https://schools.by/api/auth",
+                data={"username": username, "password": password},
+                timeout=3,
+            )
+            retry = False
+        except Exception as error:
+            logging.error("Error on auth: %s", (str(error)))
     if (
         request.status_code == 400
         and request.json()["details"]
@@ -45,11 +51,17 @@ def _get_request(token, request, session):
     Forming and sending request.
     """
     headers = {"Authorization": "Token " + token + " "}
-    request = session.get(
-        request,
-        headers=headers,
-        timeout=3,
-    )
+    retry = True
+    while retry:
+        try:
+            request = session.get(
+                request,
+                headers=headers,
+                timeout=3,
+            )
+            retry = False
+        except Exception as error:
+            logging.error("Error on request: %s", str(error))
     if request.status_code != 200:
         logging.error(str(request.text))
         raise SystemError("Can't access API")
