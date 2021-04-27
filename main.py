@@ -563,14 +563,20 @@ def send_hometask(message):
         )
     )  # next_button.
     logging.debug("Answering to message with dates")
-    logging.debug(
-        BOT.reply_to(
-            message,
-            config.CHOOSE_DATE,
-            reply_markup=keyboard,
-            disable_notification=True,
-        )
+    bots_message = BOT.reply_to(
+        message,
+        config.CHOOSE_DATE,
+        reply_markup=keyboard,
+        disable_notification=True,
     )
+    logging.debug(bots_message)
+    if message.chat.type == "private":
+        BOT.unpin_all_chat_messages(message.chat.id)
+        logging.debug(
+            BOT.pin_chat_message(
+                message.chat.id, bots_message.message_id, disable_notification=True
+            )
+        )
 
 
 @BOT.message_handler(commands=["select"])
