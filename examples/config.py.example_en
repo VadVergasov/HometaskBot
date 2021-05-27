@@ -18,6 +18,7 @@ NO_INFO = "Diary isn't present. Run /login into bot's DM."
 ABOUT = "This bot lets you get home task from schools.by platform. To use it, you should use the /login command. Note: bot doesn't store your password, nor login."
 COMMANDS = {
     "start": "Launch bot",
+    "stop": "Stop the bot in this chat and remove diary for this chat.",
     "help": "Information about this bot",
     "hometask": "Request home task",
     "set": "Set default diary for the group to person's, that called command, diary",
@@ -37,3 +38,4 @@ CHOOSE_PUPIL = "Choose a pupil:"
 SELECTED_PUPIL = "Pupil chose: {0}"
 PUPIL_NOT_SELECTED = "A pupil wasn't chosen. Use command /select to select the pupil."
 PLEASE_WAIT = "Wait a second, if this message does not change for a long time, try again."
+REMOVED = "Bot was stopped and information about diary removed."

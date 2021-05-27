@@ -18,6 +18,7 @@ NO_INFO = "{str}"
 ABOUT = "{str}"
 COMMANDS = {
     "start": "{str}",
+    "stop": "{str}",
     "help": "{str}",
     "hometask": "{str}",
     "set": "{str}",
@@ -37,3 +38,4 @@ CHOOSE_PUPIL = "{str}"
 SELECTED_PUPIL = "{str}"
 PUPIL_NOT_SELECTED = "{str}"
 PLEASE_WAIT = "{str}"
+REMOVED = "{str}"

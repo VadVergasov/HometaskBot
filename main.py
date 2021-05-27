@@ -352,6 +352,17 @@ def info(message):
     logging.debug(BOT.reply_to(message, config.ABOUT, disable_notification=True))
 
 
+@BOT.message_handler(commands=["stop"])
+def stop(message):
+    """
+    Stops bot by removing chat from database.
+    """
+    del TOKENS[str(message.chat.id)]
+    update_config()
+    logging.debug("Removed chat from database")
+    logging.debug(BOT.reply_to(message, config.REMOVED))
+
+
 @BOT.message_handler(func=check_for_credentials)
 def getting_token(message):
     """
