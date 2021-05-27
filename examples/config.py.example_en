@@ -1,4 +1,5 @@
 TG_TOKEN = "{int}:{str}" # Change is required
+ADMIN_CHAT_ID = 1 # Change is required
 WEBHOOK_HOST = "1.2.3.4"
 WEBHOOK_PORT = 8443 # Should be one of 80, 88, 443, 8443. On this port, Telegram will send requests.
 WEBHOOK_LISTEN = "127.0.0.1"

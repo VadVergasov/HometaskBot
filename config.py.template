@@ -1,4 +1,5 @@
 TG_TOKEN = "{str}"
+ADMIN_CHAT_ID = {int}
 WEBHOOK_HOST = "{str}"
 WEBHOOK_PORT = {int}
 WEBHOOK_LISTEN = "{str}"

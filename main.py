@@ -328,6 +328,16 @@ def lastpage(key):
     return answer
 
 
+@BOT.message_handler(commands=["send"])
+def send(message):
+    """
+    Send some message to all users of the bot, but only from admin's chat.
+    """
+    if message.chat.id == config.ADMIN_CHAT_ID:
+        for chat in TOKENS.keys():
+            BOT.send_message(int(chat), message.text[6:], disable_notification=True)
+
+
 @BOT.message_handler(commands=["start", "help"])
 def info(message):
     """
