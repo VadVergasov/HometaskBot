@@ -308,12 +308,18 @@ def lastpage(key):
     marks = dict()
 
     for row in response["rows"]:
-        marks[row["class_subject"]["subject"]] = list()
+        marks[row["class_subject"]["subject"]] = dict()
+        marks[row["class_subject"]["subject"]]["quarters"] = list()
+        marks[row["class_subject"]["subject"]]["year_mark"] = row["year_mark"]
+        if marks[row["class_subject"]["subject"]]["year_mark"] is None:
+            marks[row["class_subject"]["subject"]]["year_mark"] = "-"
         for number in row["quarter_marks"]:
             if row["quarter_marks"][number] is None:
-                marks[row["class_subject"]["subject"]].append("-")
+                marks[row["class_subject"]["subject"]]["quarters"].append("-")
                 continue
-            marks[row["class_subject"]["subject"]].append(row["quarter_marks"][number])
+            marks[row["class_subject"]["subject"]]["quarters"].append(
+                row["quarter_marks"][number]
+            )
 
     marks = collections.OrderedDict(sorted(marks.items()))
 
@@ -321,10 +327,9 @@ def lastpage(key):
     answer = ""
     for lesson in marks.keys():
         answer += "`" + str(lesson) + ": "
-        for mark in marks[lesson]:
+        for mark in marks[lesson]["quarters"]:
             answer += mark + " "
-        answer = answer[:-1]
-        answer += "\n`"
+        answer += "| " + str(marks[lesson]["year_mark"]) + "\n`"
     return answer
 
 
