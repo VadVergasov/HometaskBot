@@ -21,7 +21,7 @@ pyTelegramBotAPI==3.8.2
 regex==2021.7.6
 requests==2.26.0
 toml==0.10.2
-tomli==1.0.4
+tomli==1.1.0
 ujson==4.0.2
 urllib3==1.26.6
 Werkzeug==2.0.1
