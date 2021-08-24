@@ -22,7 +22,7 @@ regex==2021.7.6
 requests==2.26.0
 toml==0.10.2
 tomli==1.2.1
-ujson==4.0.2
+ujson==4.1.0
 urllib3==1.26.6
 Werkzeug==2.0.1
 wrapt==1.12.1
