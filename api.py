@@ -26,7 +26,7 @@ def auth(username, password, session):
     while retry:
         try:
             request = session.post(
-                "https://schools.by/api/auth",
+                "https://schools.by/v2/api/auth",
                 data={"username": username, "password": password},
                 timeout=3,
             )
@@ -72,7 +72,9 @@ def get_info(token, session):
     """
     Get user info from schools.by
     """
-    return _get_request(token, "https://schools.by/subdomain-api/user/current", session)
+    return _get_request(
+        token, "https://schools.by/v2/subdomain-api/user/current", session
+    )
 
 
 def get_pupils(token, parent_id, session):
@@ -81,7 +83,7 @@ def get_pupils(token, parent_id, session):
     """
     return _get_request(
         token,
-        "https://schools.by/subdomain-api/parent/" + str(parent_id) + "/pupils",
+        "https://schools.by/v2/subdomain-api/parent/" + str(parent_id) + "/pupils",
         session,
     )
 
@@ -97,7 +99,7 @@ def get_hometask(token, date, pupil_id, session):
     )
     return _get_request(
         token,
-        "https://schools.by/subdomain-api/pupil/"
+        "https://schools.by/v2/subdomain-api/pupil/"
         + str(pupil_id)
         + "/daybook/day/"
         + str(year + "-" + month + "-" + day),
@@ -111,7 +113,7 @@ def get_week(token, date, pupil_id, session):
     """
     return _get_request(
         token,
-        "https://schools.by/subdomain-api/pupil/"
+        "https://schools.by/v2/subdomain-api/pupil/"
         + str(pupil_id)
         + "/daybook/week/"
         + date.strftime("%Y-%m-%d"),
@@ -125,7 +127,7 @@ def get_lastpage(token, pupil_id, session):
     """
     return _get_request(
         token,
-        "https://schools.by/subdomain-api/pupil/"
+        "https://schools.by/v2/subdomain-api/pupil/"
         + str(pupil_id)
         + "/daybook/last-page",
         session,
