@@ -2,7 +2,7 @@ appdirs==1.4.4
 astroid==2.6.5
 black==21.7b0
 certifi==2021.5.30
-charset-normalizer==2.0.3
+charset-normalizer==2.0.5
 click==8.0.1
 colorama==0.4.4
 Flask==2.0.1
