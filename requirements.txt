@@ -2,7 +2,7 @@ appdirs==1.4.4
 astroid==2.8.4
 black==21.9b0
 certifi==2021.5.30
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
 click==8.0.3
 colorama==0.4.4
 Flask==2.0.2
@@ -24,5 +24,5 @@ toml==0.10.2
 tomli==1.2.1
 ujson==4.2.0
 urllib3==1.26.7
-Werkzeug==2.0.1
+Werkzeug==2.0.2
 wrapt==1.12.1
