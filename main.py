@@ -30,7 +30,11 @@ from urllib3.exceptions import ProtocolError
 import config
 from api import auth, get_hometask, get_info, get_lastpage, get_pupils, get_week
 
-logging.basicConfig(filename="logging.log", level=logging.DEBUG)
+logging.basicConfig(
+    filename="logging.log",
+    format="%(asctime)s - %(levelname)s: %(message)s",
+    level=logging.DEBUG,
+)
 
 if not os.path.isfile("database.json"):
     with open("database.json", "w") as f:
