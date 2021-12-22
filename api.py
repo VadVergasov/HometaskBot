@@ -34,6 +34,9 @@ def auth(username, password, session):
             request = session.post(
                 "https://schools.by/v2/api/auth",
                 data={"username": username, "password": password},
+                headers={
+                    "client-id": "0a6d97ffe21e6a9a9d9b7317456af1a92a6d6dbb59a02b24db2ad6add1381849"
+                },
                 timeout=3,
             )
             retry = False
