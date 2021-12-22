@@ -17,11 +17,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import logging
 
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+RETRIES = Retry(total=5, backoff_factor=0.1)
+
 
 def auth(username, password, session):
     """
     Authinticating and getting token.
     """
+    session.mount("https://", HTTPAdapter(max_retries=RETRIES))
     retry = True
     while retry:
         try:
@@ -50,6 +56,7 @@ def _get_request(token, request, session):
     """
     Forming and sending request.
     """
+    session.mount("https://", HTTPAdapter(max_retries=RETRIES))
     headers = {"Authorization": "Token " + token + " "}
     retry = True
     while retry:
