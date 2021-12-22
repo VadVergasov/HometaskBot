@@ -312,8 +312,8 @@ def lastpage(key):
     marks = dict()
 
     for row in response["rows"]:
-        marks[row["class_subject"]["subject"]] = dict()
-        marks[row["class_subject"]["subject"]]["quarters"] = list()
+        marks[row["class_subject"]["subject"]] = {}
+        marks[row["class_subject"]["subject"]]["quarters"] = []
         marks[row["class_subject"]["subject"]]["year_mark"] = row["year_mark"]
         if marks[row["class_subject"]["subject"]]["year_mark"] is None:
             marks[row["class_subject"]["subject"]]["year_mark"] = "-"
@@ -322,7 +322,7 @@ def lastpage(key):
                 marks[row["class_subject"]["subject"]]["quarters"].append("-")
                 continue
             marks[row["class_subject"]["subject"]]["quarters"].append(
-                row["quarter_marks"][number]
+                row["quarter_marks"][number]["m"]
             )
 
     marks = collections.OrderedDict(sorted(marks.items()))
