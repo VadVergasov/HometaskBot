@@ -19,13 +19,13 @@ mccabe==0.6.1
 mypy-extensions==0.4.3
 pathspec==0.9.0
 platformdirs==2.5.1
-pylint==2.13.4
+pylint==2.13.5
 pyTelegramBotAPI==4.4.0
 regex==2022.3.15
 requests==2.27.1
 toml==0.10.2
 tomli==2.0.1
-typing_extensions==4.1.1
+typing_extensions==4.2.0
 ujson==5.1.0
 urllib3==1.26.9
 Werkzeug==2.1.0
