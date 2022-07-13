@@ -30,4 +30,4 @@ ujson==5.4.0
 urllib3==1.26.10
 Werkzeug==2.1.2
 wrapt==1.14.1
-zipp==3.8.0
+zipp==3.8.1
