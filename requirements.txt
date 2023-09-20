@@ -27,7 +27,7 @@ requests==2.31.0
 toml==0.10.2
 tomli==2.0.1
 tomlkit==0.12.1
-typing_extensions==4.7.1
+typing_extensions==4.8.0
 ujson==5.8.0
 urllib3==2.0.4
 Werkzeug==2.3.7
