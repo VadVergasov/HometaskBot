@@ -29,7 +29,7 @@ tomli==2.0.1
 tomlkit==0.12.1
 typing_extensions==4.8.0
 ujson==5.8.0
-urllib3==2.0.5
+urllib3==2.0.6
 Werkzeug==2.3.7
 wrapt==1.15.0
 zipp==3.17.0
