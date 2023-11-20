@@ -26,7 +26,7 @@ regex==2023.10.3
 requests==2.31.0
 toml==0.10.2
 tomli==2.0.1
-tomlkit==0.12.2
+tomlkit==0.12.3
 typing_extensions==4.8.0
 ujson==5.8.0
 urllib3==2.1.0
